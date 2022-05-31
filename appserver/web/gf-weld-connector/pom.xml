@@ -80,5 +80,9 @@
             <artifactId>jakarta.faces</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-osgi-bundle</artifactId>
+        </dependency>
     </dependencies>
 </project>

@@ -78,6 +78,7 @@ import org.glassfish.internal.deployment.ExtendedDeploymentContext;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+import org.jboss.weld.lite.extension.translator.BuildCompatibleExtensionLoader;
 
 public class WeldUtils {
 
@@ -182,7 +183,8 @@ public class WeldUtils {
      * @return true, if it is an implicit bean deployment archive; otherwise, false.
      */
     public static boolean isImplicitBeanArchive(DeploymentContext context, URI archivePath) {
-        return (isImplicitBeanDiscoveryEnabled(context) && hasCDIEnablingAnnotations(context, archivePath));
+        return (isImplicitBeanDiscoveryEnabled(context) && hasCDIEnablingAnnotations(context, archivePath)
+                && BuildCompatibleExtensionLoader.getBuildCompatibleExtensions().isEmpty());
     }
 
 
