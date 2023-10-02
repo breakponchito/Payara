@@ -49,11 +49,20 @@ import com.sun.enterprise.module.ModuleState;
 import com.sun.enterprise.module.ModulesRegistry;
 import com.sun.enterprise.module.bootstrap.ModuleStartup;
 import com.sun.enterprise.module.bootstrap.StartupContext;
+import com.sun.enterprise.universal.process.ProcessManager;
+import com.sun.enterprise.universal.process.ProcessManagerException;
+import com.sun.enterprise.universal.process.ProcessManagerTimeoutException;
 import com.sun.enterprise.util.Result;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -110,6 +119,9 @@ import org.jvnet.hk2.annotations.Service;
 @Service
 @Rank(Constants.DEFAULT_IMPLEMENTATION_RANK) // This should be the default impl if no name is specified
 public class AppServerStartup implements PostConstruct, ModuleStartup {
+
+    private static final int DEFAULT_TIMEOUT= 480000;
+    private static boolean verbose = true;
     enum State {
         INITIAL, STARTING, STARTED, SHUTDOWN_REQUESTED, SHUTTING_DOWN, SHUT_DOWN;
     }
@@ -377,7 +389,112 @@ public class AppServerStartup implements PostConstruct, ModuleStartup {
             logger.log(level, "PostStartup level done in " +
                 (postStartupFinishTime - startupFinishTime) + " ms");
         }
+        //if possible here add a call to the command to stop server
+        logger.info("Possible place to add the call to stop server");
+        logger.info("Result to stop server: "+calladmin("stop-domain"));
         return true;
+    }
+
+    public static boolean calladmin(final String... args) {
+        return calladmin(AppServerStartup.DEFAULT_TIMEOUT, args);
+    }
+
+    public static boolean calladmin(int timeout, final String... args) {
+        return calladminWithOutput(timeout, args).returnValue;
+    }
+
+    protected static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win");
+    }
+
+    public static NadminReturn calladminWithOutput(final int timeout, final String... args) {
+        File cmd = new File(productRoot, getExecutable());
+        if (!cmd.canExecute()) {
+            cmd = new File(productRoot, getExecutable());
+            if (!cmd.canExecute()) {
+                cmd = new File(productRoot, getExecutable());
+            }
+        }
+        return cmdWithOutput(cmd, timeout, args);
+    }
+    
+    public static String getExecutable() {
+        String fileSeparator = System.getProperty("file.separator");
+        if(isWindows()) {
+            return "bin"+fileSeparator+"asadmin.bat";
+        } else {
+            return "bin"+fileSeparator+"asadmin";
+        }
+    }
+
+    public static NadminReturn cmdWithOutput(final File cmd, final int timeout, final String... args) {
+        List<String> command = new ArrayList<String>();
+        command.add(cmd.toString());
+        command.add("--echo");
+        command.addAll(Arrays.asList(args));
+
+        ProcessManager pm = new ProcessManager(command);
+
+        // the tests may be running unattended -- don't wait forever!
+        pm.setTimeoutMsec(timeout);
+        pm.setEcho(false);
+
+        int exit;
+        String myErr = "";
+        try {
+            exit = pm.execute();
+        }
+        catch (ProcessManagerTimeoutException tex) {
+            myErr = "\nProcessManagerTimeoutException: command timed out after " + timeout + " ms.";
+            exit = 1;
+        }
+        catch (ProcessManagerException ex) {
+            ex.printStackTrace();
+            myErr = "\n" + ex.getMessage();
+            exit = 1;
+        }
+
+        NadminReturn ret = new NadminReturn(exit, pm.getStdout(), pm.getStderr() + myErr, args[0]);
+
+        write(ret.outAndErr);
+        return ret;
+    }
+
+    private static void write(final String text) {
+        if (verbose && !text.isEmpty())
+            System.out.print(text);
+    }
+
+    protected static final File productRoot = initproductRoot();
+    
+
+    private static File initproductRoot() {
+        String productRootProp = System.getProperty("com.sun.aas.productRoot");
+        return new File(productRootProp);
+    }
+
+    private static boolean validResults(String text, String... invalidResults) {
+        for (String result : invalidResults) {
+            if (text.contains(result)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static class NadminReturn {
+        NadminReturn(int exit, String out, String err, String cmd) {
+            this.returnValue = exit == 0 && validResults(out,
+                    String.format("Command %s failed.", cmd));
+            this.out = out;
+            this.err = err;
+            this.outAndErr = this.out + this.err;
+        }
+
+        public boolean returnValue;
+        public String out;
+        public String err;
+        public String outAndErr;
     }
     
     /**
