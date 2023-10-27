@@ -37,7 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
- // Portions Copyright [2016-2020] [Payara Foundation and/or its affiliates]
+ // Portions Copyright [2016-2023] [Payara Foundation and/or its affiliates]
 
 package com.sun.enterprise.loader;
 
@@ -614,26 +614,17 @@ public class ASURLClassLoader extends CurrentBeforeParentClassLoader
             try {
                 if (res.isJar) { // It is a jarfile..
                     JarFile zip = res.zip;
-                    if(zip.isMultiRelease()) {
-                        JarFile jar = new JarFile(res.file, false, JarFile.OPEN_READ, Runtime.Version.parse(System.getProperty("java.version")));
-                        JarEntry entry = jar.getJarEntry(entryName);
-                        if(entry != null) {
-                            byte[] classData = getClassData(zip.getInputStream(entry));
-                            res.setProtectionDomain(ASURLClassLoader.this, entry.getCertificates());
-                            return classData;
-                        }
-                    } 
-                    
-                    JarEntry entry = zip.getJarEntry(entryName);
+                    JarFile jar = new JarFile(res.file, false, JarFile.OPEN_READ,
+                            Runtime.Version.parse(System.getProperty("java.version")));
+                    JarEntry entry = jar.getJarEntry(entryName);
                     if (entry != null) {
                         byte[] classData = getClassData(zip.getInputStream(entry));
                         res.setProtectionDomain(ASURLClassLoader.this, entry.getCertificates());
                         return classData;
                     }
-                    
                 } else { // Its a directory....
                     String entryPath = entryName.replace('/', File.separatorChar);
-                    File classFile = new File (res.file, entryPath);
+                    File classFile = new File(res.file, entryPath);
                     if (classFile.exists()) {
                         try (InputStream classStream = new FileInputStream(classFile)) {
                             byte[] classData = getClassData(classStream);
@@ -641,7 +632,7 @@ public class ASURLClassLoader extends CurrentBeforeParentClassLoader
                             return classData;
                         }
                     }
-                    
+
                     File multiVersionDir = new File(res.file, "META-INF/versions/");
                     if (multiVersionDir.exists()) {
                         File multiVersionClassFile = new File(multiVersionDir, entryPath);
