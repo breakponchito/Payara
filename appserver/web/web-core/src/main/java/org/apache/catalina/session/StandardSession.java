@@ -228,6 +228,8 @@ public class StandardSession implements HttpSession, Session, Serializable {
      * January 1, 1970 GMT.
      */
     protected long creationTime = 0L;
+    
+    protected transient AtomicLong atomicCreationTime = new AtomicLong(0L);
 
     /**
      * The debugging detail level for this component.  NOTE:  This value
@@ -257,6 +259,8 @@ public class StandardSession implements HttpSession, Session, Serializable {
      * The last accessed time for this Session.
      */
     protected long lastAccessedTime = creationTime;
+    
+    protected transient AtomicLong atomicLastAccessedTime = new AtomicLong(0L);
 
     /**
      * The session event listeners for this Session.
@@ -313,6 +317,8 @@ public class StandardSession implements HttpSession, Session, Serializable {
      * The current accessed time for this session.
      */
     protected long thisAccessedTime = creationTime;
+    
+    protected transient AtomicLong atomicAccessedTime = new AtomicLong(0L);
 
     /**
      * The session version, incremented and used by in-memory-replicating
@@ -364,10 +370,12 @@ public class StandardSession implements HttpSession, Session, Serializable {
      */
     @Override
     public void setCreationTime(long time) {
-        this.creationTime = time;
-        this.lastAccessedTime = time;
-        this.thisAccessedTime = time;
-
+        //this.creationTime = time;
+        //this.lastAccessedTime = time;
+        //this.thisAccessedTime = time;
+        this.atomicCreationTime.set(time);
+        this.atomicLastAccessedTime.set(time);
+        this.atomicAccessedTime.set(time);
     }
 
 
@@ -552,7 +560,7 @@ public class StandardSession implements HttpSession, Session, Serializable {
             throw new IllegalStateException
                 ("getLastAccessedTime: " + RESOURCE_BUNDLE.getString(LogFacade.SESSION_INVALIDATED_EXCEPTION));
         }
-        return (this.lastAccessedTime);
+        return this.atomicLastAccessedTime.get();
 
     }
 
@@ -564,7 +572,8 @@ public class StandardSession implements HttpSession, Session, Serializable {
      * session access to throw an IllegalStateException.
      */
     public long getLastAccessedTimeInternal() {
-        return this.lastAccessedTime;
+        //return this.lastAccessedTime;
+        return this.atomicLastAccessedTime.get();
     }
     // END SJSAS 6470831
 
@@ -577,7 +586,8 @@ public class StandardSession implements HttpSession, Session, Serializable {
      * HERCULES: added method
      */
     public void setLastAccessedTime(long lastAcessedTime) {
-        this.lastAccessedTime = lastAcessedTime;
+        //this.lastAccessedTime = lastAcessedTime;
+        this.atomicLastAccessedTime.set(lastAcessedTime);
     }
 
 
@@ -751,10 +761,14 @@ public class StandardSession implements HttpSession, Session, Serializable {
      */
     @Override
     public void access() {
-        synchronized (this) {
-            this.lastAccessedTime = this.thisAccessedTime;
-            this.thisAccessedTime = System.currentTimeMillis();
-        }
+        //this.lastAccessedTime = this.thisAccessedTime;
+        //this.thisAccessedTime = System.currentTimeMillis();
+        //this.atomicLastAccessedTime.set(this.atomicAccessedTime.get());
+        this.atomicAccessedTime.set(System.currentTimeMillis());
+        LOGGER.info("Access -> Thread:"+Thread.currentThread().toString());
+        LOGGER.info("Access -> lastAccessedTime:"+this.atomicLastAccessedTime.get());
+        LOGGER.info("Access -> thisAccessedTime:"+this.atomicAccessedTime.get());
+        LOGGER.info("Access -> thisCreationTime:"+this.atomicCreationTime.get());
         evaluateIfValid();
     }
 
@@ -765,6 +779,12 @@ public class StandardSession implements HttpSession, Session, Serializable {
     @Override
     public void endAccess() {
         isNew = false;
+        this.atomicLastAccessedTime.set(atomicAccessedTime.get());
+        this.atomicAccessedTime.set(System.currentTimeMillis());
+        LOGGER.info("Access -> Thread:"+Thread.currentThread().toString());
+        LOGGER.info("Access -> lastAccessedTime:"+this.atomicLastAccessedTime.get());
+        LOGGER.info("Access -> thisAccessedTime:"+this.atomicAccessedTime.get());
+        LOGGER.info("Access -> thisCreationTime:"+this.atomicCreationTime.get());
     }
 
 
@@ -890,7 +910,8 @@ public class StandardSession implements HttpSession, Session, Serializable {
              * session manager's related properties accordingly
              */
             long timeNow = System.currentTimeMillis();
-            int timeAlive = (int) ((timeNow - creationTime)/1000);
+            //int timeAlive = (int) ((timeNow - creationTime)/1000);
+            int timeAlive = (int) ((timeNow - this.atomicCreationTime.get())/1000);
             synchronized (manager) {
                 if (timeAlive > manager.getSessionMaxAliveTimeSeconds()) {
                     manager.setSessionMaxAliveTimeSeconds(timeAlive);
@@ -1022,9 +1043,11 @@ public class StandardSession implements HttpSession, Session, Serializable {
         attributes.clear();
         setAuthType(null);
         creationTime = 0L;
+        atomicCreationTime = new AtomicLong(0L);
         expiring = false;
         id = null;
         lastAccessedTime = 0L;
+        atomicLastAccessedTime = new AtomicLong(0L);
         maxInactiveInterval = -1;
         notes.clear();
         setPrincipal(null);
@@ -1085,7 +1108,8 @@ public class StandardSession implements HttpSession, Session, Serializable {
     @Override
     public boolean hasExpired() {
         return maxInactiveInterval >= 0
-                && (System.currentTimeMillis() - thisAccessedTime >= maxInactiveInterval * 1000L);
+                //&& (System.currentTimeMillis() - thisAccessedTime >= maxInactiveInterval * 1000L);
+                && (System.currentTimeMillis() - this.atomicAccessedTime.get() >= maxInactiveInterval * 1000L);
     }
     // END SJSAS 6329289
 
@@ -1265,7 +1289,7 @@ public class StandardSession implements HttpSession, Session, Serializable {
             throw new IllegalStateException
                 ("getCreationTime: " + RESOURCE_BUNDLE.getString(LogFacade.SESSION_INVALIDATED_EXCEPTION));
 
-        return (this.creationTime);
+        return this.atomicCreationTime.get();
 
     }
 
@@ -1836,6 +1860,9 @@ public class StandardSession implements HttpSession, Session, Serializable {
      */
     private void readObject(ObjectInputStream stream)
         throws ClassNotFoundException, IOException {
+        this.atomicLastAccessedTime = new AtomicLong(0L);
+        this.atomicAccessedTime = new AtomicLong(0L);
+        this.atomicCreationTime = new AtomicLong(0L);
 
         if (listeners == null) {
             listeners = new ArrayList<>();
@@ -1859,9 +1886,11 @@ public class StandardSession implements HttpSession, Session, Serializable {
         short readSerializedFormVersion = 0;
         if (obj instanceof Short) {
             readSerializedFormVersion = ((Short) obj);
-            creationTime = ((Long) stream.readObject());
+            //creationTime = ((Long) stream.readObject());
+            this.atomicCreationTime.set((Long) stream.readObject());
         } else {
-           creationTime = ((Long) obj);
+           //creationTime = ((Long) obj);
+            this.atomicCreationTime.set((Long) stream.readObject());
         }
 
         readRemainingObject(stream);
@@ -1910,10 +1939,22 @@ public class StandardSession implements HttpSession, Session, Serializable {
         version = new AtomicLong();
 
         lastAccessedTime = ((Long) stream.readObject());
+        if(this.atomicLastAccessedTime == null) {
+            this.atomicLastAccessedTime = new AtomicLong(lastAccessedTime);
+        } else {
+            this.atomicLastAccessedTime.set(lastAccessedTime);
+        }
+        LOGGER.info("readRemainingObject->lastAccessedTime:"+atomicLastAccessedTime.get());
         maxInactiveInterval = ((Integer) stream.readObject());
         isNew = ((Boolean) stream.readObject());
         isValid = ((Boolean) stream.readObject());
         thisAccessedTime = ((Long) stream.readObject());
+        if(this.atomicAccessedTime == null) {
+            this.atomicAccessedTime = new AtomicLong(thisAccessedTime);
+        } else {
+            this.atomicAccessedTime.set(thisAccessedTime); 
+        }
+        LOGGER.info("readRemainingObject->thisAccessedTime:"+atomicAccessedTime.get());
         /* SJSWS 6371339
         principal = null;        // Transient only
         //        setId((String) stream.readObject());
@@ -2005,12 +2046,18 @@ public class StandardSession implements HttpSession, Session, Serializable {
      */
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeObject(SERIALIZED_FORM_VERSION);
+        creationTime = atomicCreationTime.get();
         stream.writeObject(creationTime);
+        LOGGER.info("readRemainingObject->creationTime:"+creationTime);
+        lastAccessedTime = atomicLastAccessedTime.get();
         stream.writeObject(lastAccessedTime);
+        LOGGER.info("readRemainingObject->lastAccessedTime:"+lastAccessedTime);
         stream.writeObject(maxInactiveInterval);
         stream.writeObject(isNew);
         stream.writeObject(isValid);
+        thisAccessedTime= this.atomicAccessedTime.get();
         stream.writeObject(thisAccessedTime);
+        LOGGER.info("readRemainingObject->thisAccessedTime:"+thisAccessedTime);
         // START SJSWS 6371339
         // If the principal is serializable, write it out
         // START PWC 6444754

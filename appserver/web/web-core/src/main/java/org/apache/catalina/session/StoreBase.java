@@ -342,7 +342,12 @@ public abstract class StoreBase implements Lifecycle, Store {
                 if (session == null) {
                     continue;
                 }
-                int timeIdle = (int) ((timeNow - session.thisAccessedTime) / 1000L);
+                //int timeIdle = (int) ((timeNow - session.thisAccessedTime) / 1000L);
+                long accessT = 0L;
+                if(session.atomicAccessedTime != null) {
+                    accessT = session.atomicAccessedTime.get();
+                }
+                int timeIdle = (int) ((timeNow - accessT) / 1000L);
                 if (timeIdle < session.getMaxInactiveInterval()) {
                     continue;
                 }
