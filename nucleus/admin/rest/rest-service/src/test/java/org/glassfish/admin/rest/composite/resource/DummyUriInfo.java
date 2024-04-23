@@ -136,6 +136,11 @@ public class DummyUriInfo implements UriInfo {
     }
 
     @Override
+    public String getMatchedResourceTemplate() {
+        return null;
+    }
+
+    @Override
     public List<String> getMatchedURIs(boolean decode) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
