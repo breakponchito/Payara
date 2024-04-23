@@ -1284,7 +1284,7 @@ public class ApplicationProcessor implements OASProcessor, ApiVisitor {
         defaultResponse.getContent().addMediaType(jakarta.ws.rs.core.MediaType.WILDCARD, mediaType);
 
         // Add responses for the applicable declared exceptions
-        for (String exceptionType : method.getExceptionTypes()) {
+        /*for (String exceptionType : method.getExceptionTypes()) {
             final Set<APIResponse> mappedResponses = context.getMappedExceptionResponses().get(exceptionType);
             if (mappedResponses != null) {
                 for (APIResponse mappedResponse : mappedResponses) {
@@ -1297,7 +1297,7 @@ public class ApplicationProcessor implements OASProcessor, ApiVisitor {
                 }
             }
             operation.addExceptionType(exceptionType);
-        }
+        }*/
     }
 
     /**

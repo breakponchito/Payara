@@ -59,6 +59,7 @@
 
 package org.apache.catalina.connector;
 
+import java.nio.charset.Charset;
 import org.apache.catalina.LogFacade;
 
 import jakarta.servlet.ServletOutputStream;
@@ -508,6 +509,21 @@ public class ResponseFacade
     }
 
     @Override
+    public void sendRedirect(String location, boolean clearBuffer) throws IOException {
+        HttpServletResponse.super.sendRedirect(location, clearBuffer);
+    }
+
+    @Override
+    public void sendRedirect(String location, int sc) throws IOException {
+        HttpServletResponse.super.sendRedirect(location, sc);
+    }
+
+    @Override
+    public void sendRedirect(String s, int i, boolean b) throws IOException {
+        
+    }
+
+    @Override
     public void setDateHeader(String name, long date) {
 
         // Disallow operation if the object has gone out of scope
@@ -630,6 +646,11 @@ public class ResponseFacade
         }
 
         response.setCharacterEncoding(charSet);
+    }
+
+    @Override
+    public void setCharacterEncoding(Charset encoding) {
+        HttpServletResponse.super.setCharacterEncoding(encoding);
     }
 
 

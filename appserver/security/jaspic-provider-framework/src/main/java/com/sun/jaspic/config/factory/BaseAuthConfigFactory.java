@@ -65,7 +65,7 @@ import jakarta.security.auth.message.config.AuthConfigProvider;
 import jakarta.security.auth.message.config.RegistrationListener;
 import jakarta.security.auth.message.module.ServerAuthModule;
 import jakarta.servlet.ServletContext;
-import java.security.AccessController;
+//import java.security.AccessController;
 import java.security.PrivilegedAction;
 import static org.glassfish.soteria.Utils.isEmpty;
 
@@ -182,14 +182,14 @@ public abstract class BaseAuthConfigFactory extends AuthConfigFactory {
     @SuppressWarnings("unchecked")
     public String registerConfigProvider(String className, @SuppressWarnings("rawtypes") Map properties, String layer, String appContext,
             String description) {
-        tryCheckPermission(providerRegistrationSecurityPermission);
+        //tryCheckPermission(providerRegistrationSecurityPermission);
 
         return _register(_constructProvider(className, properties, null), properties, layer, appContext, description, true);
     }
 
     @Override
     public String registerConfigProvider(AuthConfigProvider provider, String layer, String appContext, String description) {
-        tryCheckPermission(providerRegistrationSecurityPermission);
+        //tryCheckPermission(providerRegistrationSecurityPermission);
 
         return _register(provider, null, layer, appContext, description, false);
     }
@@ -208,7 +208,7 @@ public abstract class BaseAuthConfigFactory extends AuthConfigFactory {
      */
     @Override
     public boolean removeRegistration(String registrationID) {
-        tryCheckPermission(AuthConfigFactory.providerRegistrationSecurityPermission);
+        //tryCheckPermission(AuthConfigFactory.providerRegistrationSecurityPermission);
 
         return _unRegister(registrationID);
     }
@@ -232,7 +232,7 @@ public abstract class BaseAuthConfigFactory extends AuthConfigFactory {
      */
     @Override
     public String[] detachListener(RegistrationListener listener, String layer, String appContext) {
-        tryCheckPermission(providerRegistrationSecurityPermission);
+        //tryCheckPermission(providerRegistrationSecurityPermission);
 
         List<String> removedListenerIds = new ArrayList<>();
         String registrationId = getRegistrationID(layer, appContext);
@@ -312,7 +312,7 @@ public abstract class BaseAuthConfigFactory extends AuthConfigFactory {
      */
     @Override
     public void refresh() {
-        tryCheckPermission(AuthConfigFactory.providerRegistrationSecurityPermission);
+        //tryCheckPermission(AuthConfigFactory.providerRegistrationSecurityPermission);
 
         Map<String, List<RegistrationListener>> preExistingListenersMap = doWriteLocked(() -> loadFactory());
 
@@ -674,12 +674,12 @@ public abstract class BaseAuthConfigFactory extends AuthConfigFactory {
         return effectedListeners;
     }
 
-    private static void tryCheckPermission(Permission permission) {
+    /*private static void tryCheckPermission(Permission permission) {
         SecurityManager securityManager = System.getSecurityManager();
         if (securityManager != null) {
             securityManager.checkPermission(permission);
         }
-    }
+    }*/
 
     protected <T> T doReadLocked(Supplier<T> supplier) {
         readLock.lock();
@@ -726,7 +726,7 @@ public abstract class BaseAuthConfigFactory extends AuthConfigFactory {
     @Override
     public String registerServerAuthModule(ServerAuthModule sam, Object context) {
         String registrationId = null;
-        if (context instanceof ServletContext) {
+        /*if (context instanceof ServletContext) {
             ServletContext servletContext = (ServletContext) context;
 
             String appContext = servletContext.getVirtualServerName() + " " + servletContext.getContextPath();
@@ -737,7 +737,7 @@ public abstract class BaseAuthConfigFactory extends AuthConfigFactory {
                     "Default authentication config provider"));
 
             servletContext.setAttribute(CONTEXT_REGISTRATION_ID, registrationId);
-        }
+        }*/
         return registrationId;
     }
 
@@ -746,9 +746,9 @@ public abstract class BaseAuthConfigFactory extends AuthConfigFactory {
         if (context instanceof ServletContext) {
             ServletContext servletContext = (ServletContext) context;
             String registrationId = (String) servletContext.getAttribute(CONTEXT_REGISTRATION_ID);
-            if (!isEmpty(registrationId)) {
+            /*if (!isEmpty(registrationId)) {
                 AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> removeRegistration(registrationId));
-            }
+            }*/
         }
     }
 }

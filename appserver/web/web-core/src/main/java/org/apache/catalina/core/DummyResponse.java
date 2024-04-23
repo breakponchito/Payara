@@ -60,6 +60,9 @@
 package org.apache.catalina.core;
 
 
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.function.Supplier;
 import org.apache.catalina.Connector;
 import org.apache.catalina.Context;
 import org.apache.catalina.HttpResponse;
@@ -123,6 +126,12 @@ public class DummyResponse
     public int getBufferSize() { return -1; }
     public String getCharacterEncoding() { return null; }
     public void setCharacterEncoding(String charEncoding) {}
+
+    @Override
+    public void setCharacterEncoding(Charset encoding) {
+        HttpServletResponse.super.setCharacterEncoding(encoding);
+    }
+
     public ServletOutputStream getOutputStream() throws IOException {
         return null;
     }
@@ -141,6 +150,17 @@ public class DummyResponse
 
     public String getHeader(String name) { return null; }
     public Collection<String> getHeaderNames() { return null; }
+
+    @Override
+    public void setTrailerFields(Supplier<Map<String, String>> supplier) {
+        HttpServletResponse.super.setTrailerFields(supplier);
+    }
+
+    @Override
+    public Supplier<Map<String, String>> getTrailerFields() {
+        return HttpServletResponse.super.getTrailerFields();
+    }
+
     public Collection<String> getHeaders(String name) { return null; }
     public void addSessionCookieInternal(final Cookie cookie) {}
     public String getMessage() { return null; }
@@ -160,6 +180,22 @@ public class DummyResponse
     public void sendError(int status) throws IOException {}
     public void sendError(int status, String message) throws IOException {}
     public void sendRedirect(String location) throws IOException {}
+
+    @Override
+    public void sendRedirect(String location, boolean clearBuffer) throws IOException {
+        HttpServletResponse.super.sendRedirect(location, clearBuffer);
+    }
+
+    @Override
+    public void sendRedirect(String location, int sc) throws IOException {
+        HttpServletResponse.super.sendRedirect(location, sc);
+    }
+
+    @Override
+    public void sendRedirect(String s, int i, boolean b) throws IOException {
+        
+    }
+
     public void setDateHeader(String name, long value) {}
     public void setHeader(String name, String value) {}
     public void setIntHeader(String name, int value) {}

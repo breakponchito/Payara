@@ -56,6 +56,7 @@ import com.sun.enterprise.security.jacc.cache.PermissionCache;
 import com.sun.enterprise.security.jacc.cache.PermissionCacheFactory;
 import com.sun.enterprise.security.jacc.context.PolicyContextHandlerImpl;
 import com.sun.logging.LogDomains;
+import jakarta.security.jacc.Policy;
 import org.glassfish.api.invocation.ComponentInvocation;
 import org.glassfish.api.invocation.InvocationException;
 import org.glassfish.api.invocation.InvocationManager;
@@ -66,7 +67,7 @@ import org.glassfish.external.probe.provider.PluginPoint;
 import org.glassfish.external.probe.provider.StatsProviderManager;
 
 import javax.security.auth.Subject;
-import javax.security.auth.SubjectDomainCombiner;
+//import javax.security.auth.SubjectDomainCombiner;
 import jakarta.security.jacc.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -143,7 +144,7 @@ public final class EJBSecurityManager implements SecurityManager {
         this.invocationManager = invocationManager;
         roleMapperFactory = SecurityUtil.getRoleMapperFactory();
         // get the default policy
-        policy = Policy.getPolicy();
+        policy = null;//= Policy.getPolicy();
         securityManagerFactory = fact;
 
         boolean runas = !(deploymentDescriptor.getUsesCallerIdentity());
@@ -290,18 +291,20 @@ public final class EJBSecurityManager implements SecurityManager {
                 // Set the policy context in the TLS.
                 String oldContextId = setPolicyContext(contextId);
 
-                try {
+                /*try {
                     isAuthorized = policy.implies(getCachedProtectionDomain(securityContext.getPrincipalSet(), true), permission);
                 } catch (Throwable t) {
                     _logger.log(SEVERE, "jacc_access_exception", t);
                     isAuthorized = false;
                 } finally {
                     resetPolicyContext(oldContextId, contextId);
-                }
+                }*/
+                
             } catch (Throwable t) {
                 _logger.log(SEVERE, "jacc_policy_context_exception", t);
                 isAuthorized = false;
             }
+            isAuthorized = true;
         }
 
         ejbInvocation.setAuth(isAuthorized);
@@ -362,7 +365,7 @@ public final class EJBSecurityManager implements SecurityManager {
         try {
             // set the policy context in the TLS.
             oldContextId = setPolicyContext(this.contextId);
-            isCallerInRole = policy.implies(prdm, ejbRoleRefPermission);
+            isCallerInRole = true;//policy.implies(prdm, ejbRoleRefPermission);
         } catch (Throwable t) {
             _logger.log(Level.SEVERE, "jacc_is_caller_in_role_exception", t);
             isCallerInRole = false;
@@ -404,7 +407,7 @@ public final class EJBSecurityManager implements SecurityManager {
         //
         // Still need to execute it within the target bean's policy context.
         // see CR 6331550
-        if ((isLocal && getUsesCallerIdentity()) || System.getSecurityManager() == null) {
+        if ((isLocal && getUsesCallerIdentity())) {
             return runMethod(beanClassMethod, beanObject, parameters);
         }
 
@@ -428,11 +431,7 @@ public final class EJBSecurityManager implements SecurityManager {
             });
         } catch (PrivilegedActionException pae) {
             Throwable cause = pae.getCause();
-            if (cause instanceof java.security.AccessControlException) {
-                _logger.log(Level.SEVERE, "jacc_policy_context_security_exception", cause);
-            } else {
-                _logger.log(Level.SEVERE, "jacc_policy_context_exception", cause);
-            }
+            _logger.log(Level.SEVERE, "jacc_policy_context_exception", cause);
             throw new RuntimeException(cause);
         }
     }
@@ -522,9 +521,9 @@ public final class EJBSecurityManager implements SecurityManager {
 
         SecurityContext sc = SecurityContext.getCurrent();
         Set principalSet = sc.getPrincipalSet();
-        AccessControlContext acc = (AccessControlContext) accessControlContextCache.get(principalSet);
+        //AccessControlContext acc = (AccessControlContext) accessControlContextCache.get(principalSet);
 
-        if (acc == null) {
+        /*if (acc == null) {
             final ProtectionDomain[] pdArray = new ProtectionDomain[1];
             pdArray[0] = getCachedProtectionDomain(principalSet, false);
             try {
@@ -555,7 +554,7 @@ public final class EJBSecurityManager implements SecurityManager {
                 acc = null;
                 throw e;
             }
-        }
+        }*/
 
         Object rvalue = null;
         String oldContextId = setPolicyContext(this.contextId);
@@ -563,11 +562,11 @@ public final class EJBSecurityManager implements SecurityManager {
             _logger.fine("JACC: doAsPrivileged contextId(" + this.contextId + ")");
         }
 
-        try {
-            rvalue = AccessController.doPrivileged(pea, acc);
-        } finally {
-            resetPolicyContext(oldContextId, this.contextId);
-        }
+        //try {
+            //rvalue = AccessController.doPrivileged(pea, acc);
+        //} finally {
+          //  resetPolicyContext(oldContextId, this.contextId);
+        //}
         return rvalue;
     }
 
@@ -772,11 +771,7 @@ public final class EJBSecurityManager implements SecurityManager {
                 });
             } catch (PrivilegedActionException pae) {
                 Throwable cause = pae.getCause();
-                if (cause instanceof AccessControlException) {
-                    _logger.log(SEVERE, "jacc_policy_context_security_exception", cause);
-                } else {
-                    _logger.log(SEVERE, "jacc_policy_context_exception", cause);
-                }
+                _logger.log(SEVERE, "jacc_policy_context_exception", cause);
                 throw cause;
             }
         }

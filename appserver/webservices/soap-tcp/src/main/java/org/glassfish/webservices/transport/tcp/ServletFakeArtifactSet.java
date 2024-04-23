@@ -59,11 +59,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author Alexey Stashok
@@ -497,6 +499,21 @@ public final class ServletFakeArtifactSet extends BaseDistributedPropertySet {
         }
 
         @Override
+        public void sendRedirect(String location, boolean clearBuffer) throws IOException {
+            HttpServletResponse.super.sendRedirect(location, clearBuffer);
+        }
+
+        @Override
+        public void sendRedirect(String location, int sc) throws IOException {
+            HttpServletResponse.super.sendRedirect(location, sc);
+        }
+
+        @Override
+        public void sendRedirect(String s, int i, boolean b) throws IOException {
+            
+        }
+
+        @Override
         public void setDateHeader(final String string, final long l) {
         }
 
@@ -549,6 +566,11 @@ public final class ServletFakeArtifactSet extends BaseDistributedPropertySet {
         }
 
         @Override
+        public void setCharacterEncoding(Charset encoding) {
+            HttpServletResponse.super.setCharacterEncoding(encoding);
+        }
+
+        @Override
         public void setContentLength(final int i) {
         }
 
@@ -598,6 +620,16 @@ public final class ServletFakeArtifactSet extends BaseDistributedPropertySet {
         @Override
         public Collection<String> getHeaderNames() {
             return null;
+        }
+
+        @Override
+        public void setTrailerFields(Supplier<Map<String, String>> supplier) {
+            HttpServletResponse.super.setTrailerFields(supplier);
+        }
+
+        @Override
+        public Supplier<Map<String, String>> getTrailerFields() {
+            return HttpServletResponse.super.getTrailerFields();
         }
 
         @Override

@@ -67,7 +67,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.AccessController;
+//import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -1525,6 +1525,11 @@ public class Response
 
     }
 
+    @Override
+    public void sendRedirect(String s, int i, boolean b) throws IOException {
+        
+    }
+
 
     /**
      * Set the specified date header to the specified value.
@@ -1664,16 +1669,16 @@ public class Response
             return false;
         }
 
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+        /*if (SecurityUtil.isPackageProtectionEnabled()) {
             return (AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
                 @Override
                 public Boolean run() {
                     return doIsEncodeable(hreq, session, location);
                 }
             }));
-        } else {
+        } else {*/
             return doIsEncodeable(hreq, session, location);
-        }
+        //}
     }
 
     private boolean doIsEncodeable(Request hreq, Session session,
@@ -1787,7 +1792,7 @@ public class Response
                     String encodedURI = null;
                     final String frelativePath = relativePath;
                     
-                     if (SecurityUtil.isPackageProtectionEnabled() ){
+                     /*if (SecurityUtil.isPackageProtectionEnabled() ){
                         try{
                             encodedURI = AccessController.doPrivileged( 
                                 new PrivilegedExceptionAction<String>(){                                
@@ -1798,9 +1803,9 @@ public class Response
                         } catch (PrivilegedActionException pae){
                             throw new IllegalArgumentException(location, pae.getCause());
                         }
-                    } else {
+                    } else {*/
                         encodedURI = urlEncoder.encodeURL(relativePath);
-                    }
+                    //}
                           
                     redirectURLCC.append(encodedURI, 0, encodedURI.length());
                     redirectURLCC.append('/');
@@ -1941,7 +1946,7 @@ public class Response
      */
     protected String getCookieString(final Cookie cookie) {
         String cookieValue;
-        if (SecurityUtil.isPackageProtectionEnabled()) {
+        /*if (SecurityUtil.isPackageProtectionEnabled()) {
             cookieValue = AccessController.doPrivileged((PrivilegedAction<String>) () -> {
                 return CookieHeaderGenerator.generateHeader(
                         cookie.getName(),
@@ -1954,7 +1959,7 @@ public class Response
                         cookie.getAttributes()
                 );
             });
-        } else {
+        } else { */
             cookieValue = CookieHeaderGenerator.generateHeader(
                     cookie.getName(),
                     cookie.getValue(),
@@ -1965,7 +1970,7 @@ public class Response
                     cookie.isHttpOnly(),
                     cookie.getAttributes()
             );
-        }
+        //}
 
         return cookieValue;
     }

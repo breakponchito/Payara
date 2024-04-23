@@ -69,7 +69,7 @@ import java.util.logging.Level;
 @Service(name="car")
 @PerLookup
 public class AppClientScanner extends ModuleScanner<ApplicationClientDescriptor> {
-    private static final Class[] managedBeanAnnotations = new Class[] {jakarta.annotation.ManagedBean.class}; 
+    //private static final Class[] managedBeanAnnotations = new Class[] {jakarta.annotation.ManagedBean.class}; 
 
     @Override
     public void process(ReadableArchive archive, ApplicationClientDescriptor bundleDesc, ClassLoader classLoader, Parser parser) throws IOException {
@@ -117,30 +117,20 @@ public class AppClientScanner extends ModuleScanner<ApplicationClientDescriptor>
             addScanClassName(desc.getCallbackHandler());
         }
 
-        GenericAnnotationDetector detector =
-            new GenericAnnotationDetector(managedBeanAnnotations);
+       // GenericAnnotationDetector detector =
+         //   new GenericAnnotationDetector(managedBeanAnnotations);
 
-        if (detector.hasAnnotationInArchive(archive)) {
+       /* if (detector.hasAnnotationInArchive(archive)) {
             if (archive instanceof FileArchive) {
                 addScanDirectory(new File(archive.getURI()));
             } else if (archive instanceof InputJarArchive) {
-                /*
-                 * This is during deployment, so use the faster code path using
-                 * the File object.
-                 */
+               
                 URI uriToAdd = archive.getURI();
                 addScanJar(scanJar(uriToAdd));
             } else if (archive instanceof MultiReadableArchive) {
-                /*
-                 * During app client launches, scan the developer's archive
-                 * which is in slot #1, not the facade archive which is in
-                 * slot #0.  Also, use URIs instead of File objects because
-                 * during Java Web Start launches we don't have access to
-                 * File objects.
-                 */
                 addScanURI(scanURI(((MultiReadableArchive) archive).getURI(1)));
             }
-        }
+        }*/
 
         this.classLoader = classLoader;
         this.archiveFile = null; // = archive;

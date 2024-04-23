@@ -58,17 +58,17 @@
         <payara.core.compare-version>6.13.0</payara.core.compare-version>
         <!-- BOM dependencies versions -->
         <payara.security-connectors.version>3.1</payara.security-connectors.version>
-        <hk2.version>3.0.1.payara-p4</hk2.version>
+        <hk2.version>4.0.0-M2</hk2.version>
         <osgi.version>8.0.0</osgi.version>
         <osgi.annotation.version>8.1.0</osgi.annotation.version>
         <osgi.enterprise.version>7.0.0</osgi.enterprise.version>
         <osgi.cmpn.version>7.0.0</osgi.cmpn.version>
         <osgi.dto.version>1.1.1</osgi.dto.version>
-        <jakarta.security.enterprise.version>3.0.3.payara-p1</jakarta.security.enterprise.version>
-        <cdi-api.version>4.1.0-M1</cdi-api.version>
+        <jakarta.security.enterprise.version>4.0.0-M3</jakarta.security.enterprise.version>
+        <cdi-api.version>4.1.0</cdi-api.version>
         <grizzly.version>4.0.0.payara-p1</grizzly.version>
-        <servlet-api.version>6.0.0</servlet-api.version>
-        <jakarta.el-api.version>5.0.1</jakarta.el-api.version>
+        <servlet-api.version>6.1.0-M2</servlet-api.version>
+        <jakarta.el-api.version>6.0.0</jakarta.el-api.version>
         <expressly.version>5.0.0</expressly.version>
         <microprofile-config.version>3.1</microprofile-config.version>
         <parsson.version>1.1.1.payara-p1</parsson.version>
@@ -81,12 +81,12 @@
         <hibernate.validator-cdi.version>8.0.0.Final</hibernate.validator-cdi.version>
         <jaxb-impl.version>4.0.1</jaxb-impl.version>
         <jsonp-api.version>2.1.0</jsonp-api.version>
-        <jakarta.security.auth.message-api.version>3.0.0</jakarta.security.auth.message-api.version>
-        <jakarta.security.jacc-api.version>2.1.0</jakarta.security.jacc-api.version>
-        <jakarta.security.enterprise-api.version>3.0.0</jakarta.security.enterprise-api.version>
+        <jakarta.security.auth.message-api.version>3.1.0-M1</jakarta.security.auth.message-api.version>
+        <jakarta.security.jacc-api.version>3.0.0-M2</jakarta.security.jacc-api.version>
+        <jakarta.security.enterprise-api.version>4.0.0-M2</jakarta.security.enterprise-api.version>
         <jakarta.ejb-api.version>4.0.1</jakarta.ejb-api.version>
         <jakarta.transaction-api.version>2.0.1</jakarta.transaction-api.version>
-        <jakarta.interceptor-api.version>2.2.0-M1</jakarta.interceptor-api.version>
+        <jakarta.interceptor-api.version>2.2.0</jakarta.interceptor-api.version>
         <jakarta.inject.version>2.0.1</jakarta.inject.version>
         <json.bind-api.version>3.0.0</json.bind-api.version>
         <jakarta-persistence-api.version>3.1.0</jakarta-persistence-api.version>
@@ -100,7 +100,7 @@
         <microprofile-openapi.version>3.1.1</microprofile-openapi.version>
         <jakarta.enterprise.deploy-api.version>1.7.2</jakarta.enterprise.deploy-api.version>
         <jakarta.resource-api.version>2.1.0</jakarta.resource-api.version>
-        <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
+        <jakarta.annotation-api.version>3.0.0-M1</jakarta.annotation-api.version>
         <exousia.version>2.1.0</exousia.version>
         <opentracing.version>0.33.0</opentracing.version>
         <jsp-api.version>3.1.0</jsp-api.version>
@@ -113,7 +113,7 @@
         <jsp-impl.version>3.2.0</jsp-impl.version>
         <asm.version>9.6</asm.version>
         <websocket-api.version>2.1.0</websocket-api.version>
-        <jax-rs-api.impl.version>3.1.0</jax-rs-api.impl.version>
+        <jax-rs-api.impl.version>4.0.0</jax-rs-api.impl.version>
         <jstl-api.version>3.0.0</jstl-api.version>
         <concurrent-api.version>3.1.0-M1</concurrent-api.version>
         <jaxws-api.version>4.0.0</jaxws-api.version>
@@ -140,7 +140,7 @@
         <metainf-services.version>1.9</metainf-services.version>
         <ldapbp.version>1.0</ldapbp.version>
         <!-- Javassist (JAVA programming ASSISTant) makes Java bytecode manipulation simple. It is a class library for editing bytecodes in Java. -->
-        <javassist.version>3.29.2-GA</javassist.version>
+        <javassist.version>3.30.2-GA</javassist.version>
         <mail.version>2.1.0</mail.version>
         <angus.mail.version>1.0.0</angus.mail.version>
         <ha-api.version>3.1.13</ha-api.version>
@@ -183,7 +183,7 @@
         <glassfishbuild.version>3.2.20.payara-p2</glassfishbuild.version>
         <maven.antrun.plugin.version>3.1.0</maven.antrun.plugin.version>
         <maven.assembly.plugin.version>3.4.2</maven.assembly.plugin.version>
-        <hk2.plugin.version>3.0.6</hk2.plugin.version>
+        <hk2.plugin.version>4.0.0-M2</hk2.plugin.version>
         <maven.build.helper.plugin.version>3.3.0</maven.build.helper.plugin.version>
         <maven.flatten.plugin.version>1.5.0</maven.flatten.plugin.version>
         <japicmp.maven.plugin.version>0.17.2</japicmp.maven.plugin.version>
