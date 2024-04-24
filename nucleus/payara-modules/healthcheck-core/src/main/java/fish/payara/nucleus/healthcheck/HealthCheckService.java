@@ -75,8 +75,6 @@ import org.jvnet.hk2.config.Transactions;
 import org.jvnet.hk2.config.UnprocessedChangeEvents;
 
 import fish.payara.internal.notification.TimeUtil;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
 import fish.payara.notification.healthcheck.HealthCheckResultStatus;
 import fish.payara.nucleus.executorservice.PayaraExecutorService;
 import fish.payara.nucleus.healthcheck.configuration.HealthCheckServiceConfiguration;
@@ -89,7 +87,7 @@ import fish.payara.nucleus.healthcheck.preliminary.BaseHealthCheck;
  */
 @Service(name = "healthcheck-core")
 @RunLevel(StartupRunLevel.VAL)
-public class HealthCheckService implements EventListener, ConfigListener, MonitoringDataSource {
+public class HealthCheckService implements EventListener, ConfigListener {
 
     private static final Logger logger = Logger.getLogger(HealthCheckService.class.getCanonicalName());
 
@@ -128,7 +126,7 @@ public class HealthCheckService implements EventListener, ConfigListener, Monito
     private ScheduledFuture<?> historicalTraceTask;
     private Set<ScheduledFuture<?>> scheduledCheckers;
 
-    @Override
+    /*@Override
     public void collect(MonitoringDataCollector rootCollector) {
         MonitoringDataCollector health = rootCollector.in("health");
         for (Entry<String, HealthCheckTask> task : registeredTasks.entrySet()) {
@@ -140,7 +138,7 @@ public class HealthCheckService implements EventListener, ConfigListener, Monito
                 }
             }
         }
-    }
+    }*/
 
 
     @Override

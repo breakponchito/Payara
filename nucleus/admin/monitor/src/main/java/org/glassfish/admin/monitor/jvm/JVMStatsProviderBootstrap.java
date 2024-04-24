@@ -49,10 +49,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jvnet.hk2.annotations.Service;
 
-import fish.payara.monitoring.collect.MonitoringDataCollection;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-
 import org.glassfish.api.monitoring.ContainerMonitoring;
 import org.glassfish.external.probe.provider.PluginPoint;
 import org.glassfish.external.probe.provider.StatsProviderManager;
@@ -67,7 +63,7 @@ import org.glassfish.internal.api.*;
  */
 @Service
 @RunLevel(value=PostStartupRunLevel.VAL, mode=RunLevel.RUNLEVEL_MODE_NON_VALIDATING)
-public class JVMStatsProviderBootstrap implements PostConstruct, MonitoringDataSource {
+public class JVMStatsProviderBootstrap implements PostConstruct {
 
     private final ServerRuntimeStatsProvider sRuntimeStatsProvider = new ServerRuntimeStatsProvider();
     private final JVMClassLoadingStatsProvider clStatsProvider = new JVMClassLoadingStatsProvider();
@@ -103,25 +99,5 @@ public class JVMStatsProviderBootstrap implements PostConstruct, MonitoringDataS
                     "jvm/thread-system/thread-"+t.getThreadId(), threadInfoStatsProvider, ContainerMonitoring.LEVEL_HIGH);
         }
     }
-
-    static {
-        MonitoringDataCollection.register(CountStatistic.class,
-                (collector, count) -> collector.collect(count.getName(), count.getCount()));
-    }
-
-    @Override
-    public void collect(MonitoringDataCollector collector) {
-        MonitoringDataCollector jvm = collector.in("jvm");
-        jvm
-            .collectObject(sRuntimeStatsProvider, MonitoringDataCollection::collectObject)
-            .collectObject(clStatsProvider, MonitoringDataCollection::collectObject)
-            .collectObject(compileStatsProvider, MonitoringDataCollection::collectObject)
-            .collectObject(memoryStatsProvider, MonitoringDataCollection::collectObject)
-            .collectObject(osStatsProvider, MonitoringDataCollection::collectObject)
-            .collectObject(runtimeStatsProvider, MonitoringDataCollection::collectObject)
-            .collectObject(threadSysStatsProvider, MonitoringDataCollection::collectObject);
-        for (JVMGCStatsProvider gc : jvmStatsProviderList) {
-            jvm.group(gc.getGcName()).collectObject(gc, MonitoringDataCollection::collectObject);
-        }
-    }
+    
 }

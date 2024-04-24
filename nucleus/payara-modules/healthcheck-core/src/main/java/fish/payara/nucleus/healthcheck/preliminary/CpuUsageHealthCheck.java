@@ -39,11 +39,6 @@
  */
 package fish.payara.nucleus.healthcheck.preliminary;
 
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
 import fish.payara.notification.healthcheck.HealthCheckResultEntry;
 import fish.payara.notification.healthcheck.HealthCheckResultStatus;
 import fish.payara.nucleus.healthcheck.HealthCheckResult;
@@ -67,8 +62,7 @@ import static fish.payara.internal.notification.TimeUtil.prettyPrintDuration;
 @Service(name = "healthcheck-cpu")
 @RunLevel(StartupRunLevel.VAL)
 public class CpuUsageHealthCheck
-extends BaseThresholdHealthCheck<HealthCheckWithThresholdExecutionOptions, CpuUsageChecker>
-implements MonitoringDataSource, MonitoringWatchSource {
+extends BaseThresholdHealthCheck<HealthCheckWithThresholdExecutionOptions, CpuUsageChecker> {
 
     private final CpuUsage healthCheck = new CpuUsage();
     private final CpuUsage collect = new CpuUsage();
@@ -101,19 +95,6 @@ implements MonitoringDataSource, MonitoringWatchSource {
             return result;
         }
         return result;
-    }
-
-    @Override
-    @MonitoringData(ns = "health", intervalSeconds = 4)
-    public void collect(MonitoringDataCollector collector) {
-        if (options != null && options.isEnabled()) {
-            collector.collect("CpuUsage", (int) collect.percentage());
-        }
-    }
-
-    @Override
-    public void collect(MonitoringWatchCollector collector) {
-        collectUsage(collector, "ns:health CpuUsage", "CPU Usage", 15, true);
     }
 
     private static final class CpuUsage {

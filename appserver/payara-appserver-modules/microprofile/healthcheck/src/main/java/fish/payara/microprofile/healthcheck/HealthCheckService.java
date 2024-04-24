@@ -95,11 +95,6 @@ import org.jvnet.hk2.config.UnprocessedChangeEvents;
 
 import fish.payara.microprofile.healthcheck.checks.PayaraHealthCheck;
 import fish.payara.microprofile.healthcheck.config.MicroprofileHealthCheckConfiguration;
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
 import fish.payara.nucleus.healthcheck.configuration.Checker;
 import fish.payara.nucleus.healthcheck.events.PayaraHealthCheckServiceEvents;
 import java.util.Optional;
@@ -114,7 +109,7 @@ import org.glassfish.internal.data.ApplicationInfo;
  */
 @Service(name = "healthcheck-service")
 @RunLevel(StartupRunLevel.VAL)
-public class HealthCheckService implements EventListener, ConfigListener, MonitoringDataSource, MonitoringWatchSource {
+public class HealthCheckService implements EventListener, ConfigListener {
 
     @Inject
     private Events events;
@@ -147,102 +142,7 @@ public class HealthCheckService implements EventListener, ConfigListener, Monito
         events.register(this);
     }
 
-    @Override
-    @MonitoringData(ns = "health", intervalSeconds = 12)
-    public void collect(MonitoringDataCollector collector) {
-        Map<String, Set<String>> collected = new HashMap<>();
-        Map<String, List<HealthCheckResponse>> readinessResponsesByAppName = collectChecks(collector, readiness, collected);
-        Map<String, List<HealthCheckResponse>> livenessResponsesByAppName = collectChecks(collector, liveness, collected);
-        Map<String, List<HealthCheckResponse>> startupResponsesByAppName = collectChecks(collector, startup, collected);
-        checksCollected.set(collected);
-        if (!collected.isEmpty()) {
-            List<HealthCheckResponse> overall = new ArrayList<>();
-            overall.addAll(collectJointType(collector, "Readiness", readinessResponsesByAppName));
-            overall.addAll(collectJointType(collector, "Liveness", livenessResponsesByAppName));
-            overall.addAll(collectJointType(collector, "Startup", startupResponsesByAppName));
-            collectUpDown(collector, computeJointState("Overall", overall));
-        }
-        for (String appName : collected.keySet()) {
-            List<HealthCheckResponse> overallByApp = new ArrayList<>();
-            overallByApp.addAll(readinessResponsesByAppName.getOrDefault(appName, emptyList()));
-            overallByApp.addAll(livenessResponsesByAppName.getOrDefault(appName, emptyList()));
-            overallByApp.addAll(startupResponsesByAppName.getOrDefault(appName, emptyList()));
-            collectUpDown(collector.group(appName), computeJointState("Overall", overallByApp));
-        }
-    }
-
-    private static void collectUpDown(MonitoringDataCollector collector, HealthCheckResponse response) {
-        collector.collect(response.getName(), response.getStatus() == Status.UP ? 1 : 0);
-    }
-
-    private static List<HealthCheckResponse> collectJointType(MonitoringDataCollector collector, String type,
-            Map<String, List<HealthCheckResponse>> healthResponsesByAppName) {
-        List<HealthCheckResponse> allForType = new ArrayList<>();
-        for (Entry<String, List<HealthCheckResponse>> e : healthResponsesByAppName.entrySet()) {
-            HealthCheckResponse joint = computeJointState(type, e.getValue());
-            collectUpDown(collector.group(e.getKey()), joint);
-            allForType.addAll(e.getValue());
-        }
-        collectUpDown(collector, computeJointState(type, allForType));
-        return allForType;
-    }
-
-    @Override
-    public void collect(MonitoringWatchCollector collector) {
-        Map<String, Set<String>> collected = checksCollected.get();
-        if (collected != null) {
-            for (Entry<String, Set<String>> e : collected.entrySet()) {
-                String appName = e.getKey();
-                for (String metric : e.getValue()) {
-                    addWatch(collector, appName, metric);
-                }
-                addWatch(collector, appName, "Readiness");
-                addWatch(collector, appName, "Liveness");
-                addWatch(collector, appName, "Startup");
-                addWatch(collector, appName, "Health");
-            }
-            if (!collected.isEmpty()) {
-                addWatch(collector, null, "Readiness");
-                addWatch(collector, null, "Liveness");
-                addWatch(collector, null, "Startup");
-                addWatch(collector, null, "Health");
-            }
-        }
-    }
-
-    private static void addWatch(MonitoringWatchCollector collector, String appName, String metric) {
-        String series = appName == null ? "ns:health " + metric : "ns:health @:" + appName + " " + metric;
-        String watchName = "RAG "+ metric + (appName == null ? "" : " @" + appName);
-        collector.watch(series, watchName, "updown")
-            .red(-1L, 5, false, null, 1, false)
-            .amber(-1L, 1, false, null, 1, false)
-            .green(1L, 1, false, null, 1, false);
-    }
-
-    private Map<String, List<HealthCheckResponse>> collectChecks(MonitoringDataCollector collector,
-            Map<String, Set<HealthCheck>> checks,            Map<String, Set<String>> collected) {
-        Map<String, List<HealthCheckResponse>> statusByApp = new HashMap<>();
-        for (Entry<String, Set<HealthCheck>> entry : checks.entrySet()) {
-            String appName = entry.getKey();
-            MonitoringDataCollector appCollector = collector.group(appName);
-            for (HealthCheck check : entry.getValue()) {
-                HealthCheckResponse response = performHealthCheckInApplicationContext(appName, check);
-                String metric = response.getName();
-                Set<String> appCollected = collected.get(appName);
-                // prevent adding same check more then once, unfortunately we have to run it to find that out
-                if (appCollected == null || !appCollected.contains(metric)) {
-                    statusByApp.computeIfAbsent(appName, key -> new ArrayList<>()).add(response);
-                    collectUpDown(appCollector, response);
-                    if (response.getStatus() == Status.DOWN && response.getData().isPresent()) {
-                        appCollector.annotate(metric, 0L, createAnnotation(response.getData().get()));
-                    }
-                    collected.computeIfAbsent(appName, key -> new HashSet<>()).add(metric);
-                }
-            }
-        }
-        return statusByApp;
-    }
-
+   
     private static HealthCheckResponse computeJointState(String name, Collection<HealthCheckResponse> responses) {
         long ups = responses.stream().filter(response -> response.getStatus() == Status.UP).count();
         if (ups == responses.size()) {

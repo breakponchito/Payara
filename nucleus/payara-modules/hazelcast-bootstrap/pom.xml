@@ -90,9 +90,9 @@
             <groupId>fish.payara.server.core.admin</groupId>
             <artifactId>admin-cli</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>fish.payara.monitoring-console</groupId>
             <artifactId>monitoring-console-api</artifactId>
-        </dependency>
+        </dependency-->
     </dependencies>
 </project>

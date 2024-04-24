@@ -39,11 +39,7 @@
  */
 package fish.payara.nucleus.healthcheck.preliminary;
 
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
+
 import fish.payara.notification.healthcheck.HealthCheckResultEntry;
 import fish.payara.notification.healthcheck.HealthCheckResultStatus;
 import fish.payara.nucleus.healthcheck.*;
@@ -73,8 +69,7 @@ import static fish.payara.internal.notification.TimeUtil.prettyPrintDuration;
 @Service(name = "healthcheck-gc")
 @RunLevel(StartupRunLevel.VAL)
 public class GarbageCollectorHealthCheck
-        extends BaseThresholdHealthCheck<HealthCheckWithThresholdExecutionOptions, GarbageCollectorChecker>
-        implements MonitoringDataSource, MonitoringWatchSource {
+        extends BaseThresholdHealthCheck<HealthCheckWithThresholdExecutionOptions, GarbageCollectorChecker> {
 
     private final GcUsage youngHealthCheck = new GcUsage();
     private final GcUsage oldHealthCheck = new GcUsage();
@@ -115,46 +110,7 @@ public class GarbageCollectorHealthCheck
 
         return result;
     }
-
-    @Override
-    public void collect(MonitoringWatchCollector collector) {
-        collectUsage(collector, "ns:health TotalGcPercentage", "GC Percentage", 10, true);
-    }
-
-    @Override
-    @MonitoringData(ns = "health", intervalSeconds = 4)
-    public void collect(MonitoringDataCollector collector) {
-        if (options == null || !options.isEnabled()) {
-            return;
-        }
-        for (GarbageCollectorMXBean gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
-            GcUsage usage = collect.computeIfAbsent(gcBean.getName(), key -> new GcUsage());
-            double percentage = usage.percentage(gcBean); // update
-            if (isYoungGenerationGC(gcBean) ) {
-                collectGcUage(collector, "Young", percentage, usage.getNumberOfGcs(), usage.getTimeSpendDoingGc());
-            } else if (isOldGenerationGC(gcBean)) {
-                collectGcUage(collector, "Old", percentage, usage.getNumberOfGcs(), usage.getTimeSpendDoingGc());
-            }
-        }
-        long timeSpendDoingGc = 0;
-        long timePassed = 0;
-        long numberOfGcs = 0;
-        for (GcUsage u : collect.values()) {
-            timePassed = Math.max(timePassed, u.getTimePassed());
-            timeSpendDoingGc += u.getTimeSpendDoingGc();
-            numberOfGcs += u.getNumberOfGcs();
-        }
-        double usage = timePassed == 0 ? 0d : 100d * timeSpendDoingGc / timePassed;
-        collectGcUage(collector, "Total", usage, numberOfGcs, timeSpendDoingGc);
-    }
-
-    private static void collectGcUage(MonitoringDataCollector collector, String label, double usage, long numberOfGcs, long timeSpendDoingGc) {
-        collector
-            .collect(label + "GcPercentage", (long) usage)
-            .collect(label + "GcCount", numberOfGcs)
-            .collect(label + "GcDuration", timeSpendDoingGc);
-    }
-
+    
     private static final class GcUsage {
 
         private volatile long timeLastChecked;

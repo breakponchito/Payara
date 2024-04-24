@@ -86,15 +86,7 @@ import com.sun.enterprise.config.serverbeans.Config;
 import com.sun.enterprise.config.serverbeans.Domain;
 import com.sun.enterprise.config.serverbeans.MonitoringService;
 
-import fish.payara.monitoring.adapt.GroupData;
-import fish.payara.monitoring.adapt.GroupDataRepository;
-import fish.payara.monitoring.adapt.MonitoringConsole;
-import fish.payara.monitoring.adapt.MonitoringConsoleFactory;
-import fish.payara.monitoring.adapt.MonitoringConsolePageConfig;
-import fish.payara.monitoring.adapt.MonitoringConsoleRuntime;
-import fish.payara.monitoring.adapt.MonitoringConsoleWatchConfig;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
+
 import fish.payara.monitoring.configuration.MonitoringConsoleConfiguration;
 import fish.payara.notification.requesttracing.RequestTrace;
 import fish.payara.notification.requesttracing.RequestTraceSpan;
@@ -104,7 +96,7 @@ import fish.payara.nucleus.requesttracing.RequestTracingService;
 import io.opentracing.tag.Tag;
 
 /**
- * This implementation of the {@link MonitoringConsoleRuntime} connects the Payara independent parts of the monitoring
+ * This implementation of the  connects the Payara independent parts of the monitoring
  * console with the Payara server.
  *
  * The most complicated aspect about the implementation is the way it is bootstrapped. By implementing
@@ -113,16 +105,14 @@ import io.opentracing.tag.Tag;
  * registers itself as an {@link EventListener} so that it can run its actual {@link #init()} bootstrapping as soon as
  * the {@link EventTypes#SERVER_READY} is received. This makes sure the bootstrapping of the console runtime does not
  * alter the order of services created by starting to collect data from services that implement
- * {@link MonitoringDataSource} or {@link MonitoringWatchSource}.
+ * .
  *
  * @author Jan Bernitt
  * @since 5.201
  */
 @Service
 public class MonitoringConsoleRuntimeImpl
-        implements ConfigListener, ApplicationLifecycleInterceptor, EventListener,
-        MonitoringConsoleRuntime, MonitoringConsoleWatchConfig, MonitoringConsolePageConfig,
-        GroupDataRepository {
+        implements ConfigListener, ApplicationLifecycleInterceptor, EventListener {
 
     private static final Logger LOGGER = Logger.getLogger("monitoring-console-core");
 
@@ -157,7 +147,7 @@ public class MonitoringConsoleRuntimeImpl
     private final AtomicBoolean initialised = new AtomicBoolean();
     private ITopic<byte[]> exchange;
     private MonitoringConsoleConfiguration config;
-    private MonitoringConsole console;
+    //private MonitoringConsole console;
 
     @PostConstruct
     public void postConstruct() {
@@ -183,9 +173,9 @@ public class MonitoringConsoleRuntimeImpl
                 HazelcastInstance hz = hazelcastCore.getInstance();
                 exchange = hz.getTopic(MONITORING_DATA_TOPIC_NAME);
             }
-            Supplier<List<MonitoringDataSource>> dataSources = () -> serviceLocator.getAllServices(MonitoringDataSource.class);
-            Supplier<List<MonitoringWatchSource>> watchSources = () -> serviceLocator.getAllServices(MonitoringWatchSource.class);
-            console = MonitoringConsoleFactory.getInstance().create(serverEnv.getInstanceName(), isDas, this, dataSources, watchSources);
+            //Supplier<List<MonitoringDataSource>> dataSources = () -> serviceLocator.getAllServices(MonitoringDataSource.class);
+            //Supplier<List<MonitoringWatchSource>> watchSources = () -> serviceLocator.getAllServices(MonitoringWatchSource.class);
+            //console = MonitoringConsoleFactory.getInstance().create(serverEnv.getInstanceName(), isDas, this, dataSources, watchSources);
             setEnabled(parseBoolean(serverConfig.getMonitoringService().getMonitoringEnabled()));
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Failed to init monitoring console runtime", ex);
@@ -209,77 +199,77 @@ public class MonitoringConsoleRuntimeImpl
     }
 
     private void setEnabled(boolean enabled) {
-        if (console != null) {
+        /*if (console != null) {
             console.setEnabled(enabled);
-        }
+        }*/
     }
 
-    @Override
+    /*@Override
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long initialDelay, long period, TimeUnit unit) {
         return executor.scheduleAtFixedRate(task, initialDelay, period, unit);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean send(byte[] snapshot) {
         if (exchange == null) {
             return false;
         }
         exchange.publish(snapshot);
         return true;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean receive(Consumer<byte[]> receiver) {
         if (exchange == null) {
             return false;
         }
         exchange.addMessageListener(msg -> receiver.accept(msg.getMessageObject()));
         return true;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public MonitoringConsoleWatchConfig getWatchConfig() {
         return this;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean isDisabled(String name) {
         return config.getDisabledWatchNames().contains(name);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void disable(String name) {
         runCommand(SET_MONITORING_CONSOLE_CONFIGURATION_COMMAND, "disable-watch", name);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void enable(String name) {
         runCommand(SET_MONITORING_CONSOLE_CONFIGURATION_COMMAND, "enable-watch", name);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void add(String name, String watchJson) {
         runCommand(SET_MONITORING_CONSOLE_CONFIGURATION_COMMAND,
                 "add-watch-name", name,
                 "add-watch-json", watchJson);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void remove(String name) {
         runCommand(SET_MONITORING_CONSOLE_CONFIGURATION_COMMAND, "remove-watch", name);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public Iterable<String> list() {
         return unmodifiableList(config.getCustomWatchValues());
-    }
+    }*/
 
-    @Override
+    /*@Override
     public MonitoringConsolePageConfig getPageConfig() {
         return this;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public String getPage(String name) {
         List<String> values = config.getPageValues();
         List<String> names = config.getPageNames();
@@ -290,9 +280,9 @@ public class MonitoringConsoleRuntimeImpl
         String page = values.get(index);
         checkPageId(name, page); // this should just protect against the mostly theoretical chance that names and values are not in sync when accessed
         return page;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void putPage(String name, String pageJson) {
         if (pageJson == null || pageJson.isEmpty() || "{}".equals(pageJson)) {
             runCommand(SET_MONITORING_CONSOLE_CONFIGURATION_COMMAND, "remove-page", name);
@@ -302,7 +292,7 @@ public class MonitoringConsoleRuntimeImpl
                     "add-page-name", name,
                     "add-page-json", pageJson);
         }
-    }
+    }*/
 
     private static void checkPageId(String name, String pageJson) {
         if (pageJson.indexOf("\"id\":\"" + name + "\"") < 0) {
@@ -310,10 +300,10 @@ public class MonitoringConsoleRuntimeImpl
         }
     }
 
-    @Override
+    /*@Override
     public Iterable<String> listPages() {
         return unmodifiableList(config.getPageNames());
-    }
+    }*/
 
     private void runCommand(String name, String... params) {
         try {
@@ -329,46 +319,7 @@ public class MonitoringConsoleRuntimeImpl
         }
     }
 
-    @Override
-    public GroupDataRepository getGroupData() {
-        return this;
-    }
-
-    @Override
-    public Collection<GroupData> selectAll(String source, String group) {
-        if (!"requesttracing".equals(source)) {
-            return emptyList();
-        }
-        List<GroupData> matches = new ArrayList<>();
-        for (RequestTrace trace : requestTracingService.getRequestTraceStore().getTraces()) {
-            if (RequestTracingService.metricGroupName(trace).equals(group)) {
-                GroupData data = new GroupData();
-                data
-                    .addField("id", trace.getTraceId())
-                    .addField("startTime", trace.getStartTime().toEpochMilli())
-                    .addField("endTime", trace.getEndTime().toEpochMilli())
-                    .addField("elapsedTime", trace.getElapsedTime());
-                for (RequestTraceSpan span : trace.getTraceSpans()) {
-                    GroupData tags = data.addChild(span.getId().toString())
-                        .addField("id", span.getId())
-                        .addField("operation", RequestTracingService.stripPackageName(span.getEventName()))
-                        .addField("startTime", span.getTimeOccured())
-                        .addField("endTime", span.getTraceEndTime().toEpochMilli())
-                        .addField("duration", span.getSpanDuration())
-                        .addChild("tags");
-                    for (Entry<Object, String> tag : span.getSpanTags().entrySet()) {
-                        if (tag.getKey() instanceof Tag) {
-                            tags.addField(((Tag)tag.getKey()).getKey(), tag.getValue());
-                        } else {
-                            tags.addField(tag.getKey().toString(), tag.getValue());
-                        }
-                    }
-                }
-                matches.add(data);
-            }
-        }
-        return matches;
-    }
+   
 
     @Override
     public void before(Phase phase, ExtendedDeploymentContext context) {

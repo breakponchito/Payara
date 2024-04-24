@@ -40,11 +40,6 @@
 package fish.payara.nucleus.healthcheck.preliminary;
 
 import fish.payara.nucleus.healthcheck.HealthCheckResult;
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
 import fish.payara.notification.healthcheck.HealthCheckResultEntry;
 import fish.payara.notification.healthcheck.HealthCheckResultStatus;
 import fish.payara.nucleus.healthcheck.HealthCheckWithThresholdExecutionOptions;
@@ -70,8 +65,7 @@ import java.util.List;
 @Service(name = "healthcheck-machinemem")
 @RunLevel(StartupRunLevel.VAL)
 public class MachineMemoryUsageHealthCheck
-extends BaseThresholdHealthCheck<HealthCheckWithThresholdExecutionOptions, MachineMemoryUsageChecker>
-implements MonitoringDataSource, MonitoringWatchSource {
+extends BaseThresholdHealthCheck<HealthCheckWithThresholdExecutionOptions, MachineMemoryUsageChecker> {
 
     private static final String MEMTOTAL = "MemTotal:";
     private static final String MEMFREE = "MemFree:";
@@ -125,24 +119,7 @@ implements MonitoringDataSource, MonitoringWatchSource {
         return result;
     }
 
-    @Override
-    public void collect(MonitoringWatchCollector collector) {
-        collectUsage(collector, "ns:health PhysicalMemoryUsage", "Physical Memory Usage", 5, false);
-    }
-
-    @Override
-    @MonitoringData(ns = "health", intervalSeconds = 12)
-    public void collect(MonitoringDataCollector collector) {
-        if (options != null && options.isEnabled()) {
-            try {
-                collector.collect("PhysicalMemoryUsage", (long) stats.usedPercentage());
-            } catch (RuntimeException ex) {
-                throw ex;
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
+   
 
     private static final class PysicalMemoryUsage {
         private volatile long totalMemory;

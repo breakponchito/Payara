@@ -43,9 +43,6 @@ import fish.payara.microprofile.faulttolerance.*;
 import fish.payara.microprofile.faulttolerance.policy.FaultTolerancePolicy;
 import fish.payara.microprofile.faulttolerance.state.CircuitBreakerState;
 import fish.payara.microprofile.metrics.MetricsService;
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
 import fish.payara.notification.requesttracing.RequestTraceSpan;
 import fish.payara.nucleus.requesttracing.RequestTracingService;
 
@@ -92,7 +89,7 @@ import java.util.logging.Logger;
 @Service(name = "microprofile-fault-tolerance-service")
 @RunLevel(StartupRunLevel.VAL)
 public class FaultToleranceServiceImpl
-        implements EventListener, FaultToleranceService, MonitoringDataSource, FaultToleranceRequestTracing {
+        implements EventListener, FaultToleranceService, FaultToleranceRequestTracing {
 
     private static final Logger logger = Logger.getLogger(FaultToleranceServiceImpl.class.getName());
 
@@ -140,44 +137,9 @@ public class FaultToleranceServiceImpl
         }
     }
 
-    @Override
-    @MonitoringData(ns = "ft")
-    public void collect(MonitoringDataCollector collector) {
-        for (Entry<MethodKey, FaultToleranceMethodContextImpl> methodEntry : contextByMethod.entrySet()) {
-            MonitoringDataCollector methodCollector = collector.group(methodEntry.getKey().getMethodId())
-                    .tag("app", methodEntry.getValue().getAppName());
-            FaultToleranceMethodContext context = methodEntry.getValue();
-            BlockingQueue<Thread> concurrentExecutions = context.getConcurrentExecutions();
-            if (concurrentExecutions != null) {
-                collectBulkheadSemaphores(methodCollector, concurrentExecutions);
-                collectBulkheadSemaphores(methodCollector, concurrentExecutions, context.getQueuingOrRunningPopulation());
-            }
-            collectCircuitBreakerState(methodCollector, context.getState());
-        }
-    }
+  
 
-    private static void collectBulkheadSemaphores(MonitoringDataCollector collector,
-            BlockingQueue<Thread> concurrentExecutions) {
-        collector
-                .collect("RemainingConcurrentExecutionsCapacity", concurrentExecutions.remainingCapacity())
-                .collect("ConcurrentExecutions", concurrentExecutions.size());
-    }
-
-    private static void collectBulkheadSemaphores(MonitoringDataCollector collector,
-            BlockingQueue<Thread> concurrentExecutions, AtomicInteger queuingOrRunningPopulation) {
-        collector
-                .collect("WaitingQueuePopulation", queuingOrRunningPopulation.get() - concurrentExecutions.size());
-    }
-
-    private static void collectCircuitBreakerState(MonitoringDataCollector collector, CircuitBreakerState state) {
-        if (state == null) {
-            return;
-        }
-        collector
-                .collect("circuitBreakerHalfOpenSuccessful", state.getHalfOpenSuccessfulResultCounter())
-                .collect("circuitBreakerState", state.getCircuitState().name().charAt(0));
-    }
-
+    
     @Override
     public FaultToleranceConfig getConfig(InvocationContext context, Stereotypes stereotypes) {
         return configByAppName.computeIfAbsent(getAppName(context),

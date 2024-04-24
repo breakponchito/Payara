@@ -82,11 +82,6 @@ import org.jvnet.hk2.config.UnprocessedChangeEvents;
 import fish.payara.internal.notification.PayaraNotification;
 import fish.payara.internal.notification.PayaraNotificationFactory;
 import fish.payara.internal.notification.TimeUtil;
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
 import fish.payara.notification.requesttracing.EventType;
 import fish.payara.notification.requesttracing.RequestTrace;
 import fish.payara.notification.requesttracing.RequestTraceSpan;
@@ -116,7 +111,7 @@ import io.opentracing.tag.Tag;
  */
 @Service(name = "requesttracing-service")
 @RunLevel(StartupRunLevel.VAL)
-public class RequestTracingService implements EventListener, ConfigListener, MonitoringDataSource, MonitoringWatchSource {
+public class RequestTracingService implements EventListener, ConfigListener {
 
 
     private static final Logger logger = Logger.getLogger(RequestTracingService.class.getCanonicalName());
@@ -612,7 +607,7 @@ public class RequestTracingService implements EventListener, ConfigListener, Mon
         return requestTraceStore;
     }
 
-    @Override
+    /*@Override
     public void collect(MonitoringWatchCollector collector) {
         if ("true".equals(configuration.getEnabled())) {
             long thresholdMillis = getConfigurationThresholdInMillis();
@@ -621,14 +616,14 @@ public class RequestTracingService implements EventListener, ConfigListener, Mon
                 .red(thresholdMillis, 10, true, null, null, false)
                 .green(-(thresholdMillis/2), 1, false, null, null, false);
         }
-    }
+    }*/
 
     private long getConfigurationThresholdInMillis() {
         return TimeUnit.MILLISECONDS.convert(Long.parseLong(configuration.getThresholdValue()), 
                 TimeUnit.valueOf(configuration.getThresholdUnit()));
     }
 
-    @Override
+    /*@Override
     @MonitoringData(ns = "trace")
     public void collect(MonitoringDataCollector collector) {
         for (String group : activeCollectionGroups.keySet()) {
@@ -644,10 +639,10 @@ public class RequestTracingService implements EventListener, ConfigListener, Mon
             }
             trace = uncollectedTraces.poll();
         }
-    }
+    }*/
 
 
-    private static String collectTrace(MonitoringDataCollector tracingCollector, RequestTrace trace, long threshold) {
+    /*private static String collectTrace(MonitoringDataCollector tracingCollector, RequestTrace trace, long threshold) {
         try {
             UUID traceId = trace.getTraceId();
             if (traceId != null) {
@@ -680,7 +675,7 @@ public class RequestTracingService implements EventListener, ConfigListener, Mon
             logger.log(Level.FINE, "Failed to collect trace", ex);
         }
         return null;
-    }
+    }*/
 
     public static String metricGroupName(RequestTrace trace) {
         return stripPackageName(trace.getTraceSpans().getLast().getEventName());

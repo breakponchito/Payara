@@ -45,11 +45,7 @@ import com.sun.enterprise.connectors.util.ResourcesUtil;
 import com.sun.enterprise.resource.pool.PoolManager;
 import com.sun.enterprise.resource.pool.PoolStatus;
 
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
+
 import fish.payara.notification.healthcheck.HealthCheckResultEntry;
 import fish.payara.nucleus.healthcheck.HealthCheckResult;
 import fish.payara.nucleus.healthcheck.HealthCheckStatsProvider;
@@ -85,7 +81,7 @@ import com.sun.enterprise.config.serverbeans.Module;
 @RunLevel(10)
 public class ConnectionPoolHealthCheck
     extends BaseThresholdHealthCheck<HealthCheckConnectionPoolExecutionOptions, ConnectionPoolChecker>
-    implements MonitoringDataSource, MonitoringWatchSource, HealthCheckStatsProvider {
+    implements  HealthCheckStatsProvider {
 
     @Inject
     private Domain domain;
@@ -173,23 +169,7 @@ public class ConnectionPoolHealthCheck
         ));
         return result;
     }
-
-    @Override
-    public void collect(MonitoringWatchCollector collector) {
-        collectUsage(collector, "ns:health @:* PoolUsage", "Connection Pool Usage", 5, false);
-    }
-
-    @Override
-    @MonitoringData(ns = "health", intervalSeconds = 8)
-    public void collect(MonitoringDataCollector collector) {
-        if (options != null && options.isEnabled()) {
-            freeConnections.clear();
-            usedConnections.clear();
-            consumeAllJdbcResources(createConsumer((info, usedPercentage)
-                    -> collector.group(info.getName()).collect("PoolUsage", usedPercentage.longValue())
-            ));
-        }
-    }
+    
 
     private Consumer<JdbcResource> createConsumer(BiConsumer<PoolInfo, Double> poolUsageConsumer) {
         return resource -> {

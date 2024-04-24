@@ -44,8 +44,8 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import com.hazelcast.map.LocalMapStats;
 import com.hazelcast.map.impl.MapService;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
+//import fish.payara.monitoring.collect.MonitoringDataCollector;
+//import fish.payara.monitoring.collect.MonitoringDataSource;
 import fish.payara.nucleus.events.HazelcastEvents;
 import fish.payara.nucleus.hazelcast.HazelcastCore;
 import fish.payara.nucleus.hazelcast.encryption.PayaraHazelcastEncryptedValueHolder;
@@ -73,7 +73,7 @@ import org.glassfish.internal.api.JavaEEContextUtil.Context;
  */
 @Service(name = "payara-cluster-store")
 @RunLevel(StartupRunLevel.VAL)
-public class ClusteredStore implements EventListener, MonitoringDataSource {
+public class ClusteredStore implements EventListener {
     private static final Logger logger = Logger.getLogger(ClusteredStore.class.getCanonicalName());
 
     @Inject
@@ -90,7 +90,7 @@ public class ClusteredStore implements EventListener, MonitoringDataSource {
         events.register(this);
     }
 
-    @Override
+    /*@Override
     public void collect(MonitoringDataCollector collector) {
         if (hzCore.isEnabled()) {
             try (Context ctx = ctxUtil.empty().pushContext()) {
@@ -112,7 +112,7 @@ public class ClusteredStore implements EventListener, MonitoringDataSource {
                 }
             }
         }
-    }
+    }*/
 
     public UUID getInstanceId() {
         return hzCore.getUUID();

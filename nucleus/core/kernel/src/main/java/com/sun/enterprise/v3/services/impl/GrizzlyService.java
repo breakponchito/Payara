@@ -51,10 +51,6 @@ import com.sun.enterprise.util.Result;
 import com.sun.enterprise.util.StringUtils;
 import com.sun.enterprise.v3.services.impl.monitor.GrizzlyMonitoring;
 
-import fish.payara.monitoring.collect.MonitoringDataCollection;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -135,7 +131,7 @@ import org.glassfish.api.container.GrizzlyNetworkListenerRestartAdapter;
 @RunLevel(StartupRunLevel.VAL)
 @Rank(Constants.IMPORTANT_RUN_LEVEL_SERVICE)
 public class GrizzlyService implements RequestDispatcher, PostConstruct, PreDestroy, EventListener,
-        FutureProvider<Result<Thread>>, MonitoringDataSource {
+        FutureProvider<Result<Thread>> {
 
     @Inject @Named(ServerEnvironment.DEFAULT_INSTANCE_NAME)
     Config config;
@@ -187,26 +183,7 @@ public class GrizzlyService implements RequestDispatcher, PostConstruct, PreDest
         futures = new ArrayList<>();
         monitoring = new GrizzlyMonitoring();
     }
-
-    static {
-        MonitoringDataCollection.register(CountStatistic.class,
-                (collector, count) -> collector.collect(count.getName(), count.getCount()));
-    }
-
-    @Override
-    public void collect(MonitoringDataCollector collector) {
-        if (!"true".equals(monitoringService.getMonitoringEnabled()) ||
-            !"HIGH".equals(monitoringService.getModuleMonitoringLevels().getHttpService())) {
-            return;
-        }
-        MonitoringDataCollector httpCollector = collector.in("http");
-        httpCollector.prefix("ThreadPool").collectObject(
-                monitoring.getThreadPoolStatsProvider(NETWORK_CONFIG_PREFIX), MonitoringDataCollection::collectObject);
-        httpCollector.prefix("ConnectionQueue").collectObject(
-                monitoring.getConnectionQueueStatsProvider(NETWORK_CONFIG_PREFIX), MonitoringDataCollection::collectObject);
-        httpCollector.prefix("FileCache").collectObject(
-                monitoring.getFileCacheStatsProvider(NETWORK_CONFIG_PREFIX), MonitoringDataCollection::collectObject);
-    }
+    
 
     /**
      * Add the new proxy to our list of proxies.

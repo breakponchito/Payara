@@ -112,9 +112,9 @@
             <groupId>fish.payara.server.core.common</groupId>
             <artifactId>amx-core</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>fish.payara.monitoring-console</groupId>
             <artifactId>monitoring-console-api</artifactId>
-        </dependency>
+        </dependency-->
     </dependencies>
 </project>

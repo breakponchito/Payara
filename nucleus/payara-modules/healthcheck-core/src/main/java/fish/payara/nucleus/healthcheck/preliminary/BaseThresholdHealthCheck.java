@@ -39,7 +39,7 @@
  */
 package fish.payara.nucleus.healthcheck.preliminary;
 
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
+
 import fish.payara.notification.healthcheck.HealthCheckResultStatus;
 import fish.payara.nucleus.healthcheck.HealthCheckWithThresholdExecutionOptions;
 import fish.payara.nucleus.healthcheck.configuration.ThresholdDiagnosticsChecker;
@@ -94,7 +94,7 @@ public abstract class BaseThresholdHealthCheck<O extends HealthCheckWithThreshol
         return options;
     }
 
-    protected final void collectUsage(MonitoringWatchCollector collector, String series, String name, //
+    /*protected final void collectUsage(MonitoringWatchCollector collector, String series, String name, //
             Number forLast, boolean onAverage) {
         if (options == null || !options.isEnabled()) {
             return;
@@ -108,5 +108,5 @@ public abstract class BaseThresholdHealthCheck<O extends HealthCheckWithThreshol
             .red(red, forLast, onAverage, red - amber2red, forLast, onAverage)
             .amber(amber, forLast, onAverage, amber - green2amber, forLast, onAverage)
             .green(green, null, false, null, null, false);
-    }
+    }*/
 }

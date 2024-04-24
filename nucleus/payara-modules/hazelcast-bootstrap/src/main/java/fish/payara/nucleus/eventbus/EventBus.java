@@ -39,8 +39,8 @@
  */
 package fish.payara.nucleus.eventbus;
 
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
+//import fish.payara.monitoring.collect.MonitoringDataCollector;
+//import fish.payara.monitoring.collect.MonitoringDataSource;
 import fish.payara.nucleus.events.HazelcastEvents;
 import fish.payara.nucleus.hazelcast.HazelcastCore;
 import java.util.Map;
@@ -67,7 +67,7 @@ import java.util.UUID;
  */
 @Service(name = "payara-event-bus")
 @RunLevel(StartupRunLevel.VAL)
-public class EventBus implements EventListener, MonitoringDataSource {
+public class EventBus implements EventListener {
     
     private static final Logger logger = Logger.getLogger(EventBus.class.getCanonicalName());
     
@@ -85,8 +85,8 @@ public class EventBus implements EventListener, MonitoringDataSource {
         messageReceivers = new ConcurrentHashMap<>(2);
     }
 
-    @Override
-    public void collect(MonitoringDataCollector rootCollector) {
+    //@Override
+    /*public void collect(MonitoringDataCollector rootCollector) {
         MonitoringDataCollector eventCollector = rootCollector.in("topic");
         if (hzCore.isEnabled()) {
             HazelcastInstance hz = hzCore.getInstance();
@@ -99,7 +99,7 @@ public class EventBus implements EventListener, MonitoringDataSource {
                 }
             }
         }
-    }
+    }*/
 
     /**
      * Sends out a message to all listeners in the Hazelcast sluster that are

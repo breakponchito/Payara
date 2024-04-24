@@ -40,11 +40,6 @@
 package fish.payara.nucleus.healthcheck.preliminary;
 
 import fish.payara.nucleus.healthcheck.HealthCheckResult;
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
 import fish.payara.notification.healthcheck.HealthCheckResultEntry;
 import fish.payara.nucleus.healthcheck.HealthCheckWithThresholdExecutionOptions;
 import fish.payara.nucleus.healthcheck.configuration.HeapMemoryUsageChecker;
@@ -62,8 +57,7 @@ import java.lang.management.MemoryUsage;
 @Service(name = "healthcheck-heap")
 @RunLevel(StartupRunLevel.VAL)
 public class HeapMemoryUsageHealthCheck
-extends BaseThresholdHealthCheck<HealthCheckWithThresholdExecutionOptions, HeapMemoryUsageChecker> 
-implements MonitoringDataSource, MonitoringWatchSource {
+extends BaseThresholdHealthCheck<HealthCheckWithThresholdExecutionOptions, HeapMemoryUsageChecker>  {
 
     @PostConstruct
     void postConstruct() {
@@ -99,19 +93,7 @@ implements MonitoringDataSource, MonitoringWatchSource {
     private static MemoryUsage getMemoryUsage() {
         return ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
     }
-
-    @Override
-    public void collect(MonitoringWatchCollector collector) {
-        collectUsage(collector, "ns:health HeapUsage", "Heap Usage", 15, true);
-    }
-
-    @Override
-    @MonitoringData(ns = "health", intervalSeconds = 4)
-    public void collect(MonitoringDataCollector collector) {
-        if (options != null && options.isEnabled()) {
-            collector.collect("HeapUsage", calculatePercentage(getMemoryUsage()));
-        }
-    }
+    
 
     private static long calculatePercentage(MemoryUsage usage) {
         return usage.getMax() == 0L ? 0L : Math.round(((double)usage.getUsed() / (double)usage.getMax()) * 100d);

@@ -60,15 +60,10 @@ import com.sun.appserv.connectors.internal.api.ConnectorsUtil;
 import com.sun.enterprise.config.serverbeans.Domain;
 import com.sun.enterprise.config.serverbeans.ResourcePool;
 
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
 
 @Service
 @Singleton
-public class SQLTraceStoreImpl implements SQLTraceStore, MonitoringDataSource, MonitoringWatchSource {
+public class SQLTraceStoreImpl implements SQLTraceStore {
 
     private static final class SQLTraceEntry {
         final long thresholdMillis;
@@ -103,54 +98,7 @@ public class SQLTraceStoreImpl implements SQLTraceStore, MonitoringDataSource, M
         queue.add(new SQLTraceEntry(threshold, record, sql));
     }
 
-    @Override
-    public void collect(MonitoringWatchCollector collector) {
-        for (Entry<String, JdbcConnectionPool> poolEntry : connectionPoolByName.entrySet()) {
-            JdbcConnectionPool pool = poolEntry.getValue();
-            if (pool != null) {
-                String poolName = poolEntry.getKey();
-                long thresholdInMillis = thresholdInMillis(pool);
-                if (thresholdInMillis > 0) {
-                    collector.watch("ns:sql @:"+poolName+" MaxExecutionTime", poolName + " Slow Query", "ms")
-                        .red(thresholdInMillis, 0, false, null, null, false);
-                }
-            }
-        }
-    }
-
-    @Override
-    @MonitoringData(ns = "sql")
-    public void collect(MonitoringDataCollector collector) {
-        long now = System.currentTimeMillis();
-        for (Entry<String, Queue<SQLTraceEntry>> poolEntry : uncollectedTracesByPoolName.entrySet()) {
-            MonitoringDataCollector poolCollector = collector.group(poolEntry.getKey());
-            int count = 0;
-            long maxExecutionTime = 0L;
-            long sumExecutionTime = 0L;
-            Queue<SQLTraceEntry> entries = poolEntry.getValue();
-            SQLTraceEntry entry = entries.poll();
-            while (entry != null) {
-                if (now - entry.trace.getTimeStamp() < 5000) { // only add trace in case it was from last 5 seconds
-                    count++;
-                    long executionTime = entry.trace.getExecutionTime();
-                    maxExecutionTime = Math.max(maxExecutionTime, executionTime);
-                    sumExecutionTime += executionTime;
-                    if (executionTime > entry.thresholdMillis) {
-                        poolCollector.annotate( //
-                                "MaxExecutionTime", executionTime, //
-                                "Threshold", "" + entry.thresholdMillis, //
-                                "Timestamp", "" + entry.trace.getTimeStamp(), //
-                                "SQL", entry.sql);
-                    }
-                }
-                entry = entries.poll();
-            }
-            poolCollector
-                .collect("MaxExecutionTime", maxExecutionTime)
-                .collect("AvgExecutionTime", count == 0L ? 0L : sumExecutionTime / count)
-            ;
-        }
-    }
+   
 
     private static long thresholdInMillis(JdbcConnectionPool pool) {
         String thresholdInSeconds = pool.getSlowQueryThresholdInSeconds();

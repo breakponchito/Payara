@@ -54,9 +54,6 @@ import com.sun.enterprise.config.serverbeans.HttpService;
 import com.sun.enterprise.config.serverbeans.MonitoringService;
 import com.sun.enterprise.config.serverbeans.VirtualServer;
 
-import fish.payara.monitoring.collect.MonitoringDataCollection;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
 
 import org.glassfish.api.admin.ServerEnvironment;
 import org.glassfish.external.probe.provider.PluginPoint;
@@ -77,7 +74,7 @@ import org.jvnet.hk2.config.ConfigurationException;
  */
 @Service(name = "http-service")
 @Singleton
-public class HttpServiceStatsProviderBootstrap implements PostConstruct, MonitoringDataSource {
+public class HttpServiceStatsProviderBootstrap implements PostConstruct {
 
     @Inject @Named(ServerEnvironment.DEFAULT_INSTANCE_NAME)
     Config config;
@@ -120,21 +117,5 @@ public class HttpServiceStatsProviderBootstrap implements PostConstruct, Monitor
                     httpServiceStatsProvider);
         }
     }
-
-    static {
-        MonitoringDataCollection.register(CountStatistic.class,
-                (collector, count) -> collector.collect(count.getName(), count.getCount()));
-    }
-
-    @Override
-    public void collect(MonitoringDataCollector collector) {
-        if (!"true".equals(monitoringService.getMonitoringEnabled()) ||
-            !"HIGH".equals(monitoringService.getModuleMonitoringLevels().getHttpService())) {
-            return;
-        }
-        MonitoringDataCollector http = collector.in("http").prefix("Server");
-        for (HttpServiceStatsProvider provider : httpServiceStatsProviders.values()) {
-            http.collectObject(provider, MonitoringDataCollection::collectObject);
-        }
-    }
+    
 }

@@ -61,11 +61,6 @@ import fish.payara.micro.ClusterCommandResult;
 import fish.payara.micro.data.InstanceDescriptor;
 import fish.payara.microprofile.healthcheck.config.MicroprofileHealthCheckConfiguration;
 import fish.payara.nucleus.healthcheck.configuration.MicroProfileHealthCheckerConfiguration;
-import fish.payara.monitoring.collect.MonitoringData;
-import fish.payara.monitoring.collect.MonitoringDataCollector;
-import fish.payara.monitoring.collect.MonitoringDataSource;
-import fish.payara.monitoring.collect.MonitoringWatchCollector;
-import fish.payara.monitoring.collect.MonitoringWatchSource;
 import fish.payara.notification.healthcheck.HealthCheckResultEntry;
 import fish.payara.notification.healthcheck.HealthCheckResultStatus;
 import fish.payara.nucleus.executorservice.PayaraExecutorService;
@@ -101,7 +96,7 @@ import org.jvnet.hk2.annotations.Service;
 @RunLevel(10)
 public class MicroProfileHealthChecker
 extends BaseHealthCheck<HealthCheckTimeoutExecutionOptions, MicroProfileHealthCheckerConfiguration>
-implements PostConstruct, MonitoringDataSource, MonitoringWatchSource {
+implements PostConstruct {
 
     private static final Logger LOGGER = Logger.getLogger(MicroProfileHealthChecker.class.getPackage().getName());
 
@@ -172,48 +167,8 @@ implements PostConstruct, MonitoringDataSource, MonitoringWatchSource {
         return result;
     }
 
-    @Override
-    public void collect(MonitoringWatchCollector collector) {
-        if (!envrionment.isDas() || options == null || !options.isEnabled()) {
-            return;
-        }
-        collector.watch("ns:health LivelinessUp", "Liveliness UP", "percent")
-            .red(-60, null, false, null, null, false)
-            .amber(-100, null, false, null, null, false)
-            .green(100, null, false, null, null, false);
-    }
-
-    /**
-     * The idea is that every 12 seconds this data is collected. 
-     * This triggers the tasks.
-     * If there are tasks from 12 seconds ago these should be done otherwise they are causing a "immediate" timeout
-     * as next collection is 12 seconds later.
-     * So from the point of view of the collector results are available "immediately" while the asynchronous tasks
-     * had 12 seconds to finish.
-     */
-    @Override
-    @MonitoringData(ns = "health", intervalSeconds = 12)
-    public void collect(MonitoringDataCollector collector) {
-        if (!envrionment.isDas() || options == null || !options.isEnabled()) {
-            return;
-        }
-        Map<String, Future<Integer>> instances = priorCollectionTasks;
-        if (instances != null) {
-            int upCount = 0;
-            for (Entry<String, Future<Integer>> instance : instances.entrySet()) {
-                try {
-                    int statusCode = instance.getValue().get(10, MILLISECONDS);
-                    if (statusCode == HTTP_OK) {
-                        upCount++;
-                    }
-                } catch (Exception ex) {
-                    LOGGER.log(Level.FINE, "Failed to ping " + instance.getKey(), ex);
-                }
-            }
-            collector.collect("LivelinessUp",100 * upCount / instances.size());
-        }
-        priorCollectionTasks = pingAllInstances(10000L);
-    }
+   
+    
 
     /**
      * Pings MP health check endpoint of all instances and returns a map containing a {@link Future} returning the ping
