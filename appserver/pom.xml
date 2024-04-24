@@ -452,7 +452,7 @@
                             <nonFinal>false</nonFinal>
                             <jarType>api</jarType>
                             <specVersion>2.3</specVersion>
-                            <specImplVersion>${jsp-impl.version}</specImplVersion>
+                            <specImplVersion>${jsp-api.version}</specImplVersion>
                             <apiPackage>jakarta.servlet.jsp</apiPackage>
                         </spec>
                         <spec>
