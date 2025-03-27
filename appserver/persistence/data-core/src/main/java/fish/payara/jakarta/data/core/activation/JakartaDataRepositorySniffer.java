@@ -41,6 +41,7 @@ package fish.payara.jakarta.data.core.activation;
 
 import com.sun.enterprise.module.HK2Module;
 import fish.payara.jakarta.data.core.connector.JakartaDataContainer;
+import jakarta.data.repository.Repository;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -53,6 +54,7 @@ import org.glassfish.api.deployment.DeploymentContext;
 import org.glassfish.api.deployment.archive.ArchiveType;
 import org.glassfish.api.deployment.archive.ReadableArchive;
 import org.glassfish.hk2.api.PerLookup;
+import org.glassfish.hk2.classmodel.reflect.Types;
 import org.jvnet.hk2.annotations.Service;
 
 /**
@@ -65,8 +67,13 @@ public class JakartaDataRepositorySniffer implements Sniffer {
     
     @Override
     public boolean handles(DeploymentContext context) {
-        final ReadableArchive archive = context.getSource();
-        return handles(archive);
+        final Types types = context.getTransientAppMetaData(Types.class.getName(), Types.class);
+        if (types != null) {
+            if(types.getBy(Repository.class.getName()) != null) {
+                return true;
+            }
+        }
+        return handles(context);
     }
 
     @Override

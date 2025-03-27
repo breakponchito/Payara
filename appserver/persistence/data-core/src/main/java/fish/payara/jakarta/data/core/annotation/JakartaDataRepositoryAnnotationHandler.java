@@ -41,7 +41,10 @@ package fish.payara.jakarta.data.core.annotation;
 
 import com.sun.enterprise.deployment.annotation.context.ResourceContainerContext;
 import com.sun.enterprise.deployment.annotation.handlers.AbstractResourceHandler;
+import fish.payara.jakarta.data.core.RepositoryServiceImpl;
 import jakarta.data.repository.Repository;
+import jakarta.inject.Inject;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.glassfish.apf.AnnotationHandlerFor;
@@ -59,14 +62,31 @@ import org.jvnet.hk2.annotations.Service;
 public class JakartaDataRepositoryAnnotationHandler extends AbstractResourceHandler {
     
     private static final Logger logger = Logger.getLogger(JakartaDataRepositoryAnnotationHandler.class.getName());
-    
-    public JakartaDataRepositoryAnnotationHandler() {}
+
+    @Inject
+    private RepositoryServiceImpl handler;
     
     @Override
     protected HandlerProcessingResult processAnnotation(AnnotationInfo ainfo, ResourceContainerContext[] rcContexts) throws AnnotationProcessorException {
         logger.log(Level.FINE,"JakartaDataRepositoryAnnotationHandler");
         logger.log(Level.FINE,"starting with the processing of annotation " + ainfo);
-        JakartaDataRepositoryUtilityParsing.processAnnotation(ainfo, rcContexts);
+        try {
+            ClassLoader loader = ((Class) ainfo.getAnnotatedElement()).getClassLoader();
+            Class<?> annotatedElementClass = loader.loadClass(((Class) ainfo.getAnnotatedElement()).getName());
+            if(handler.getRepositoryMap().isEmpty()) {
+                handler.getRepositoryMap().put(annotatedElementClass, ainfo);
+            } else{
+                Enumeration<Class<?>> cl = handler.getRepositoryMap().keys();
+                while (cl.hasMoreElements()) {
+                    Class<?> c = cl.nextElement();
+                    if(!c.getName().equals(annotatedElementClass.getName())) {
+                        handler.getRepositoryMap().put(c, ainfo);
+                    }
+                }
+            }
+        } catch(ClassNotFoundException cne) {
+            logger.info("Error trying to find class");
+        }
         return getDefaultProcessedResult();
     }
 }

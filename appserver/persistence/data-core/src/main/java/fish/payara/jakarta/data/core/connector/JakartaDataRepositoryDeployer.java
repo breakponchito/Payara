@@ -58,6 +58,8 @@ public class JakartaDataRepositoryDeployer implements Deployer<JakartaDataContai
     public MetaData getMetaData() {
         return null;
     }
+    
+    
 
     @Override
     public <V> V loadMetaData(Class<V> type, DeploymentContext context) {
@@ -72,6 +74,11 @@ public class JakartaDataRepositoryDeployer implements Deployer<JakartaDataContai
     @Override
     public JakartaDataApplicationContainer load(JakartaDataContainer container, DeploymentContext context) {
         //Here we can declare extension to process beans
+        //Collection<Supplier<Extension>> snifferExtensions =
+          //      context.getTransientAppMetaData(WeldDeployer.SNIFFER_EXTENSIONS, Collection.class);
+        //if (snifferExtensions != null) {
+        //    snifferExtensions.add(JakartaDataExtension::new);
+        //}
         return new JakartaDataApplicationContainer(context);
     }
 
