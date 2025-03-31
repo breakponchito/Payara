@@ -39,6 +39,5 @@
  #
 -exportcontents: fish.payara.jakarta.data.core; \
                  fish.payara.jakarta.data.core.activation; \
-                 fish.payara.jakarta.data.core.annotation; \
                  fish.payara.jakarta.data.core.cdi.extension; \
                  fish.payara.jakarta.data.core.connector; version=${project.osgi.version}
