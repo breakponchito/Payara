@@ -261,7 +261,7 @@ public class RepositoryImpl<T> implements InvocationHandler {
             for (Object e : toIterate) {
                 results.add(em.merge(e));
             }
-            if (!transactionStarted) {
+            if (transactionStarted) {
                 endTransaction();
             }
             if (!results.isEmpty()) {
@@ -270,7 +270,7 @@ public class RepositoryImpl<T> implements InvocationHandler {
         } else if (args[0] != null) {
             boolean transactionStarted = startTransactionAndJoin();
             entity = em.merge(args[0]);
-            if (!transactionStarted) {
+            if (transactionStarted) {
                 endTransaction();
             }
         }
