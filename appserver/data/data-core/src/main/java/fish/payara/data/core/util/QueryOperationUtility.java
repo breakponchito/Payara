@@ -51,7 +51,6 @@ import jakarta.transaction.HeuristicMixedException;
 import jakarta.transaction.HeuristicRollbackException;
 import jakarta.transaction.NotSupportedException;
 import jakarta.transaction.RollbackException;
-import jakarta.transaction.Status;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.TransactionManager;
 
@@ -66,7 +65,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static fish.payara.data.core.util.DataCommonOperationUtility.*;
+import static fish.payara.data.core.util.DataCommonOperationUtility.endTransaction;
+import static fish.payara.data.core.util.DataCommonOperationUtility.handleSort;
+import static fish.payara.data.core.util.DataCommonOperationUtility.paginationPredicate;
+import static fish.payara.data.core.util.DataCommonOperationUtility.processReturnQueryUpdate;
+import static fish.payara.data.core.util.DataCommonOperationUtility.startTransactionAndJoin;
 import static fish.payara.data.core.util.FindOperationUtility.excludeParameter;
 import static fish.payara.data.core.util.FindOperationUtility.getSingleEntityName;
 import static fish.payara.data.core.util.FindOperationUtility.parametersToExclude;

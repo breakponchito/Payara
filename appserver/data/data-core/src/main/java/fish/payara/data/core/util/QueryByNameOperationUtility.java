@@ -55,7 +55,6 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
-import jakarta.transaction.Status;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.TransactionManager;
 
@@ -69,7 +68,10 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
-import static fish.payara.data.core.util.DataCommonOperationUtility.*;
+import static fish.payara.data.core.util.DataCommonOperationUtility.extractDataParameter;
+import static fish.payara.data.core.util.DataCommonOperationUtility.paginationPredicate;
+import static fish.payara.data.core.util.DataCommonOperationUtility.processReturnQueryUpdate;
+import static fish.payara.data.core.util.DataCommonOperationUtility.startTransactionAndJoin;
 import static fish.payara.data.core.util.FindOperationUtility.createQueriesForPagination;
 import static fish.payara.data.core.util.FindOperationUtility.excludeParameter;
 import static fish.payara.data.core.util.FindOperationUtility.getPageRequest;

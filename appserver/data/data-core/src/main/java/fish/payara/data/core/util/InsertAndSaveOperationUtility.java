@@ -45,14 +45,15 @@ import jakarta.transaction.HeuristicMixedException;
 import jakarta.transaction.HeuristicRollbackException;
 import jakarta.transaction.NotSupportedException;
 import jakarta.transaction.RollbackException;
-import jakarta.transaction.Status;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.TransactionManager;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fish.payara.data.core.util.DataCommonOperationUtility.*;
+import static fish.payara.data.core.util.DataCommonOperationUtility.endTransaction;
+import static fish.payara.data.core.util.DataCommonOperationUtility.processReturnType;
+import static fish.payara.data.core.util.DataCommonOperationUtility.startTransactionAndJoin;
 
 /**
  * Utility class to process Insert and Save operations

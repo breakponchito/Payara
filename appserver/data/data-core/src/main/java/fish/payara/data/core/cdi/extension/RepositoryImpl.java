@@ -81,7 +81,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static fish.payara.data.core.util.DataCommonOperationUtility.*;
+import static fish.payara.data.core.util.DataCommonOperationUtility.endTransaction;
+import static fish.payara.data.core.util.DataCommonOperationUtility.evaluateReturnTypeVoidPredicate;
+import static fish.payara.data.core.util.DataCommonOperationUtility.extractDataParameter;
+import static fish.payara.data.core.util.DataCommonOperationUtility.getEntityManager;
+import static fish.payara.data.core.util.DataCommonOperationUtility.paginationPredicate;
+import static fish.payara.data.core.util.DataCommonOperationUtility.processReturnQueryUpdate;
+import static fish.payara.data.core.util.DataCommonOperationUtility.processReturnType;
+import static fish.payara.data.core.util.DataCommonOperationUtility.startTransactionAndJoin;
 import static fish.payara.data.core.util.InsertAndSaveOperationUtility.processInsertAndSaveOperationForArray;
 
 /**

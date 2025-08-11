@@ -47,7 +47,6 @@ import jakarta.transaction.HeuristicMixedException;
 import jakarta.transaction.HeuristicRollbackException;
 import jakarta.transaction.NotSupportedException;
 import jakarta.transaction.RollbackException;
-import jakarta.transaction.Status;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.TransactionManager;
 
@@ -55,9 +54,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.endTransaction;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.startTransactionAndJoin;
-import static fish.payara.jakarta.data.core.util.FindOperationUtility.getIDParameterName;
+import static fish.payara.data.core.util.DataCommonOperationUtility.endTransaction;
+import static fish.payara.data.core.util.DataCommonOperationUtility.startTransactionAndJoin;
+import static fish.payara.data.core.util.FindOperationUtility.getIDParameterName;
 
 /**
  * Utility class used to process Jakarta Data delete operations
