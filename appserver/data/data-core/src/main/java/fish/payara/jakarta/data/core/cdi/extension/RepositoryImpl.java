@@ -466,10 +466,10 @@ public class RepositoryImpl<T> implements InvocationHandler {
     public void startTransactionAndJoin() throws SystemException, NotSupportedException {
         if (transactionManager.getStatus() == Status.STATUS_ACTIVE) {
             return;
-        } else if (transactionManager.getStatus() == Status.STATUS_NO_TRANSACTION) {
-            transactionManager.begin();
-            em.joinTransaction();
-        }
+        } 
+        
+        transactionManager.begin();
+        em.joinTransaction();
     }
 
     public void endTransaction() throws HeuristicRollbackException, SystemException, HeuristicMixedException, RollbackException {
