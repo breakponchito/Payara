@@ -69,9 +69,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.extractDataParameter;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.paginationPredicate;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.processReturnQueryUpdate;
+import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.*;
 import static fish.payara.jakarta.data.core.util.FindOperationUtility.createQueriesForPagination;
 import static fish.payara.jakarta.data.core.util.FindOperationUtility.excludeParameter;
 import static fish.payara.jakarta.data.core.util.FindOperationUtility.getPageRequest;
@@ -106,30 +104,20 @@ public class QueryByNameOperationUtility {
         if (entitiesToDelete.isEmpty()) {
             return processReturnQueryUpdate(dataForQuery.getMethod(), 0);
         }
-
-        // Step 2: Remove the found entities within a transaction.
-        boolean userTransaction = false;
+        
         try {
-            userTransaction = transactionManager.getStatus() == Status.STATUS_ACTIVE;
-        } catch (SystemException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            if (!userTransaction) {
-                transactionManager.begin();
-                entityManager.joinTransaction();
-            }
+            startTransactionAndJoin(transactionManager, entityManager, dataForQuery.isUserTransaction());
             for (Object entity : entitiesToDelete) {
                 // To be safe, merge the entity to ensure it's managed before removing.
                 entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
             }
-            if (!userTransaction) {
+            if (!dataForQuery.isUserTransaction()) {
                 transactionManager.commit();
                 clearCaches(entityManager);
             }
         } catch (Exception e) {
             try {
-                if (!userTransaction) {
+                if (!dataForQuery.isUserTransaction()) {
                     transactionManager.rollback();
                 }
             } catch (SystemException se) {

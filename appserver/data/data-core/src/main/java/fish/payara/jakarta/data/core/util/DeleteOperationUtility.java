@@ -55,6 +55,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
+import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.endTransaction;
+import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.startTransactionAndJoin;
 import static fish.payara.jakarta.data.core.util.FindOperationUtility.getIDParameterName;
 
 /**
@@ -65,7 +67,7 @@ public class DeleteOperationUtility {
     public static final Logger logger = Logger.getLogger(DeleteOperationUtility.class.getName());
 
     public static int processDeleteByOperation(Object[] args, Class<?> declaredEntityClass, TransactionManager tm,
-                                               EntityManager em, EntityMetadata entityMetadata, Method method)
+                                               EntityManager em, EntityMetadata entityMetadata, Method method, boolean isUserTransaction)
             throws SystemException, NotSupportedException, HeuristicRollbackException,
             HeuristicMixedException, RollbackException {
 
@@ -101,21 +103,14 @@ public class DeleteOperationUtility {
         if (hasWhere) {
             builder.append(")");
         }
-
-        boolean userTransaction = tm.getStatus() == Status.STATUS_ACTIVE;
-        if (!userTransaction) {
-            tm.begin();
-            em.joinTransaction();
-        }
+        
+        startTransactionAndJoin(tm, em, isUserTransaction);
         Query q = em.createQuery(builder.toString());
         for (int i = 0; i < args.length; i++) {
             q.setParameter(i + 1, args[i]);
         }
         int rowsAffected = q.executeUpdate();
-        if (!userTransaction) {
-            em.flush();
-            tm.commit();
-        }
+        endTransaction(tm, em, isUserTransaction);
 
         logger.info("Rows affected from delete operation: " + rowsAffected);
         return rowsAffected;
@@ -130,35 +125,6 @@ public class DeleteOperationUtility {
         }
         throw new IllegalArgumentException("The attribute " + attributeName +
                 " is not mapped on the entity " + entityMetadata.getEntityName());
-    }
-
-    public static int processDeleteByIdOperation(Object[] args, Class<?> declaredEntityClass, TransactionManager tm,
-                                                 EntityManager em, String idNameValue) throws SystemException,
-            NotSupportedException, HeuristicRollbackException, HeuristicMixedException, RollbackException {
-        String query = createDeleteOperationSingleEntity(declaredEntityClass, idNameValue);
-        boolean userTransaction = tm.getStatus() == Status.STATUS_ACTIVE;
-        if (!userTransaction) {
-            tm.begin();
-            em.joinTransaction();
-        }
-        Query q = em.createQuery(query);
-        q.setParameter(1, args[0]);
-        int rowsAffected = q.executeUpdate();
-        if (!userTransaction) {
-            em.flush();
-            tm.commit();
-        }
-        logger.info("Rows affected from delete operation:" + rowsAffected);
-        return rowsAffected;
-    }
-
-
-    public static String createDeleteOperationSingleEntity(Class<?> entityClass, String idNameValue) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("DELETE FROM ").append(entityClass.getSimpleName())
-                .append(" ").append("o").append(" WHERE ").append("(")
-                .append("o.").append(getIDParameterName(idNameValue)).append("=?1)");
-        return builder.toString();
     }
 
 }

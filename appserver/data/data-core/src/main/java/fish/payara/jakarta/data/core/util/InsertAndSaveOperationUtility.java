@@ -52,7 +52,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.processReturnType;
+import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.*;
 
 /**
  * Utility class to process Insert and Save operations
@@ -66,19 +66,14 @@ public class InsertAndSaveOperationUtility {
         int length = Array.getLength(args[0]);
         List<Object> results = null;
         results = new ArrayList<>(length);
-        boolean userTransaction = tm.getStatus() == Status.STATUS_ACTIVE;
-        if (!userTransaction) {
-            tm.begin();
-            em.joinTransaction();
-        }
+        startTransactionAndJoin(tm, em, dataForQuery.isUserTransaction());
+        
         for (int i = 0; i < length; i++) {
             em.persist(Array.get(args[0], i));
             results.add(Array.get(args[0], i));
         }
-        if (!userTransaction) {
-            em.flush();
-            tm.commit();
-        }
+        
+        endTransaction(tm, em, dataForQuery.isUserTransaction());
 
         if (!results.isEmpty()) {
             return processReturnType(dataForQuery, results);

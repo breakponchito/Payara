@@ -56,6 +56,13 @@ import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 import jakarta.persistence.metamodel.SingularAttribute;
+import jakarta.transaction.HeuristicMixedException;
+import jakarta.transaction.HeuristicRollbackException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.Status;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionManager;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -420,5 +427,25 @@ public class DataCommonOperationUtility {
             }
         }
         return new DataParameter(limit, sortList);
+    }
+
+    public static void startTransactionAndJoin(TransactionManager transactionManager, 
+                                               EntityManager em,boolean isUserManagedTransaction) throws SystemException, NotSupportedException {
+        if (isUserManagedTransaction) {
+            return;
+        }
+
+        if(transactionManager.getStatus() == Status.STATUS_NO_TRANSACTION) {
+            transactionManager.begin();
+            em.joinTransaction();
+        }
+    }
+
+    public static void endTransaction(TransactionManager transactionManager,
+                               EntityManager em, boolean isUserManagedTransaction) throws HeuristicRollbackException, SystemException, HeuristicMixedException, RollbackException {
+        if(!isUserManagedTransaction) {
+            em.flush();
+            transactionManager.commit();
+        }
     }
 }

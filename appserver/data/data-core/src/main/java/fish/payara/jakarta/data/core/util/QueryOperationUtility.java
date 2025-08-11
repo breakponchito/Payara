@@ -66,9 +66,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.handleSort;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.paginationPredicate;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.processReturnQueryUpdate;
+import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.*;
 import static fish.payara.jakarta.data.core.util.FindOperationUtility.excludeParameter;
 import static fish.payara.jakarta.data.core.util.FindOperationUtility.getSingleEntityName;
 import static fish.payara.jakarta.data.core.util.FindOperationUtility.parametersToExclude;
@@ -156,16 +154,9 @@ public class QueryOperationUtility {
                 }
 
                 if (deletePredicate.test(firstChar) || updatePredicate.test(firstChar)) {
-                    boolean userTransaction = transactionManager.getStatus() == Status.STATUS_ACTIVE;
-                    if (!userTransaction) {
-                        transactionManager.begin();
-                        entityManager.joinTransaction();
-                    }
+                    startTransactionAndJoin(transactionManager, entityManager, dataForQuery.isUserTransaction());
                     int deleteReturn = q.executeUpdate();
-                    if (!userTransaction) {
-                        entityManager.flush();
-                        transactionManager.commit();
-                    }
+                    endTransaction(transactionManager, entityManager, dataForQuery.isUserTransaction());
 
                     return processReturnQueryUpdate(method, deleteReturn);
                 } else {

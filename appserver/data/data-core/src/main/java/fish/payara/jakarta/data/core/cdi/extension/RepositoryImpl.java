@@ -81,12 +81,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.evaluateReturnTypeVoidPredicate;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.extractDataParameter;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.getEntityManager;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.paginationPredicate;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.processReturnQueryUpdate;
-import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.processReturnType;
+import static fish.payara.jakarta.data.core.util.DataCommonOperationUtility.*;
 import static fish.payara.jakarta.data.core.util.InsertAndSaveOperationUtility.processInsertAndSaveOperationForArray;
 
 /**
@@ -152,12 +147,13 @@ public class RepositoryImpl<T> implements InvocationHandler {
         logger.info("executing method:" + method.getName());
         QueryData dataForQuery = queries.get(method);
         Object objectToReturn;
-
+        startTransactionComponents();
+        prevalidateTransaction(dataForQuery);
         switch (dataForQuery.getQueryType()) {
             case SAVE -> objectToReturn = processSaveOperation(args, dataForQuery);
             case INSERT -> objectToReturn = processInsertOperation(args, dataForQuery);
             case DELETE ->
-                    objectToReturn = processDeleteOperation(args, dataForQuery.getDeclaredEntityClass(), dataForQuery.getMethod());
+                    objectToReturn = processDeleteOperation(args, dataForQuery.getDeclaredEntityClass(), dataForQuery.getMethod(), dataForQuery.isUserTransaction());
             case UPDATE -> objectToReturn = processUpdateOperation(args, dataForQuery);
             case FIND -> objectToReturn = processFindOperation(proxy, args, dataForQuery);
             case QUERY -> objectToReturn = processQueryOperation(args, dataForQuery);
@@ -169,6 +165,10 @@ public class RepositoryImpl<T> implements InvocationHandler {
         }
 
         return objectToReturn;
+    }
+
+    private void prevalidateTransaction(QueryData dataForQuery) throws SystemException {
+        dataForQuery.setUserTransaction(transactionManager.getStatus() == Status.STATUS_ACTIVE);
     }
 
     public Object processFindOperation(Object proxy, Object[] args, QueryData dataForQuery) {
@@ -251,27 +251,26 @@ public class RepositoryImpl<T> implements InvocationHandler {
         List<Object> results;
         Object entity = null;
         Object arg = args[0] instanceof Stream ? ((Stream<?>) args[0]).sequential().collect(Collectors.toList()) : args[0];
-        startTransactionComponents();
+        
 
         if (dataForQuery.getEntityParamType().isArray()) {
             return processInsertAndSaveOperationForArray(args, getTransactionManager(), getEntityManager(this.applicationName), dataForQuery);
         } else if (arg instanceof Iterable toIterate) {
             results = new ArrayList<>();
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, dataForQuery.isUserTransaction());
             for (Object e : toIterate) {
                 results.add(em.merge(e));
             }
             
-            endTransaction();
+            endTransaction(transactionManager, em, dataForQuery.isUserTransaction());
             
             if (!results.isEmpty()) {
                 return processReturnType(dataForQuery, results);
             }
         } else if (args[0] != null) {
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, dataForQuery.isUserTransaction());
             entity = em.merge(args[0]);
-            endTransaction();
-            
+            endTransaction(transactionManager, em, dataForQuery.isUserTransaction());
         }
 
         if (evaluateReturnTypeVoidPredicate.test(dataForQuery.getMethod().getReturnType())) {
@@ -286,27 +285,27 @@ public class RepositoryImpl<T> implements InvocationHandler {
         List<Object> results;
         Object entity = null;
         Object arg = args[0] instanceof Stream ? ((Stream<?>) args[0]).sequential().collect(Collectors.toList()) : args[0];
-        startTransactionComponents();
+        
 
         if (dataForQuery.getEntityParamType().isArray()) { //insert multiple entities from array reference
             return processInsertAndSaveOperationForArray(args, getTransactionManager(), getEntityManager(this.applicationName), dataForQuery);
         } else if (arg instanceof Iterable toIterate) {  //insert multiple entities from list reference
             results = new ArrayList<>();
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, dataForQuery.isUserTransaction());
             for (Object e : ((Iterable<?>) toIterate)) {
                 em.persist(e);
                 results.add(e);
             }
-            endTransaction();
+            endTransaction(transactionManager, em, dataForQuery.isUserTransaction());
 
             if (!results.isEmpty()) {
                 return processReturnType(dataForQuery, results);
             }
         } else if (arg != null) { //insert a single entity
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, dataForQuery.isUserTransaction());
             entity = args[0];
             em.persist(args[0]);
-            endTransaction();
+            endTransaction(transactionManager, em, dataForQuery.isUserTransaction());
         }
 
         if (evaluateReturnTypeVoidPredicate.test(dataForQuery.getMethod().getReturnType())) {
@@ -316,22 +315,20 @@ public class RepositoryImpl<T> implements InvocationHandler {
         return entity;
     }
 
-    public Object processDeleteOperation(Object[] args, Class<?> declaredEntityClass, Method method)
+    public Object processDeleteOperation(Object[] args, Class<?> declaredEntityClass, Method method, boolean isUserTransaction)
             throws SystemException, NotSupportedException, HeuristicRollbackException,
             HeuristicMixedException, RollbackException {
         int returnValue = 0;
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
         if (args == null) { // delete all records
-            startTransactionComponents();
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, isUserTransaction);
             String deleteAllQuery = "DELETE FROM " + declaredEntityClass.getSimpleName();
             returnValue = em.createQuery(deleteAllQuery).executeUpdate();
-            endTransaction();
+            endTransaction(transactionManager, em, isUserTransaction);
         } else if (args[0] instanceof List arr) {
             // existing list handling code
-            startTransactionComponents();
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, isUserTransaction);
             List<Object> ids = getIds((List<?>) arr);
             if (!ids.isEmpty()) {
                 String deleteQuery = "DELETE FROM " + declaredEntityClass.getSimpleName() + " e WHERE e.id IN :ids";
@@ -339,7 +336,7 @@ public class RepositoryImpl<T> implements InvocationHandler {
                         .setParameter("ids", ids)
                         .executeUpdate();
             }
-            endTransaction();
+            endTransaction(transactionManager, em, isUserTransaction);
             
         } else {
             // Handle @By annotation cases
@@ -350,7 +347,6 @@ public class RepositoryImpl<T> implements InvocationHandler {
             final boolean hasByAnnotation = byFound.isPresent();
 
             if (hasByAnnotation) {
-                startTransactionComponents();
                 QueryData queryData = queries.get(method);
                 returnValue = DeleteOperationUtility.processDeleteByOperation(
                         args,
@@ -358,11 +354,10 @@ public class RepositoryImpl<T> implements InvocationHandler {
                         getTransactionManager(),
                         getEntityManager(this.applicationName),
                         queryData.getEntityMetadata(),
-                        method
+                        method, isUserTransaction
                 );
             } else if (args[0] != null) { // delete single entity
-                startTransactionComponents();
-                startTransactionAndJoin();
+                startTransactionAndJoin(transactionManager, em, isUserTransaction);
                 try {
                     Method getId = args[0].getClass().getMethod("getId");
                     Object id = getId.invoke(args[0]);
@@ -373,7 +368,7 @@ public class RepositoryImpl<T> implements InvocationHandler {
                 } catch (Exception e) {
                     throw new RuntimeException("Error to get entity ID", e);
                 }
-                endTransaction();
+                endTransaction(transactionManager, em, isUserTransaction);
             }
         }
 
@@ -400,17 +395,16 @@ public class RepositoryImpl<T> implements InvocationHandler {
         List<Object> results;
         Object entity = null;
         Object arg = args[0] instanceof Stream ? ((Stream<?>) args[0]).sequential().collect(Collectors.toList()) : args[0];
-        startTransactionComponents();
 
         if (dataForQuery.getEntityParamType().isArray()) { //update multiple entities from array reference
             int length = Array.getLength(args[0]);
             results = new ArrayList<>(length);
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, dataForQuery.isUserTransaction());
             for (int i = 0; i < length; i++) {
                 em.merge(Array.get(args[0], i));
                 results.add(Array.get(args[0], i));
             }
-            endTransaction();
+            endTransaction(transactionManager, em, dataForQuery.isUserTransaction());
             
 
             if (!results.isEmpty()) {
@@ -418,20 +412,20 @@ public class RepositoryImpl<T> implements InvocationHandler {
             }
         } else if (arg instanceof List toIterate) { //update multiple entities
             results = new ArrayList<>();
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, dataForQuery.isUserTransaction());
             for (Object e : ((Iterable<?>) toIterate)) {
                 entity = em.merge(e);
                 results.add(entity);
             }
-            endTransaction();
+            endTransaction(transactionManager, em, dataForQuery.isUserTransaction());
 
             if (!results.isEmpty()) {
                 return processReturnType(dataForQuery, results);
             }
         } else if (arg != null) { //update single entity
-            startTransactionAndJoin();
+            startTransactionAndJoin(transactionManager, em, dataForQuery.isUserTransaction());
             entity = em.merge(args[0]);
-            endTransaction();
+            endTransaction(transactionManager, em, dataForQuery.isUserTransaction());
         }
 
         if (evaluateReturnTypeVoidPredicate.test(dataForQuery.getMethod().getReturnType())) {
@@ -463,18 +457,6 @@ public class RepositoryImpl<T> implements InvocationHandler {
         em = getEntityManager(this.applicationName);
     }
 
-    public void startTransactionAndJoin() throws SystemException, NotSupportedException {
-        if (transactionManager.getStatus() == Status.STATUS_ACTIVE) {
-            return;
-        } 
-        
-        transactionManager.begin();
-        em.joinTransaction();
-    }
-
-    public void endTransaction() throws HeuristicRollbackException, SystemException, HeuristicMixedException, RollbackException {
-        em.flush();
-        transactionManager.commit();
-    }
+    
 
 }
