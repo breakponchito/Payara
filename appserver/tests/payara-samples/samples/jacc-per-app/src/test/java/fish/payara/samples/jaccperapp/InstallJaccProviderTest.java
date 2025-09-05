@@ -94,8 +94,7 @@ public class InstallJaccProviderTest {
                     ProtectedServlet.class,
                     TestAuthenticationMechanism.class,
                     TestIdentityStore.class
-                ).addAsLibraries(jaccLibrary.asFile(),
-                            Maven.resolver().loadPomFromFile(pomPath).resolve("jakarta.authorization:jakarta.authorization-api").withTransitivity().asFile())
+                ).addAsLibraries(jaccLibrary.asFile())
                 ;
 
         System.out.println("************************************************************");
