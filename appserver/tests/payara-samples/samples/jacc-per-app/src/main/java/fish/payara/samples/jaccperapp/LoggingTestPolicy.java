@@ -10,7 +10,7 @@ import jakarta.security.jacc.WebResourcePermission;
 import jakarta.security.jacc.WebRoleRefPermission;
 import jakarta.security.jacc.WebUserDataPermission;
 
-import org.omnifaces.jaccprovider.TestPolicy;
+import jakarta.security.jacc.Policy;
 
 /**
  * Test policy used for easy testing that the policy is indeed used.
