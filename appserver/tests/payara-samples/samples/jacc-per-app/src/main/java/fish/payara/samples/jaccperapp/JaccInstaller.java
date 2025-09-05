@@ -18,15 +18,17 @@ import fish.payara.jacc.JaccConfigurationFactory;
  *
  */
 @WebListener
-public class JaccInstaller implements ServletContextListener {
+public class PolicyRegistrationInstaller implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
 
-        JaccConfigurationFactory.getJaccConfigurationFactory().registerContextProvider(
-                getAppContextId(sce.getServletContext()),
-                new TestPolicyConfigurationFactory());
+        //JaccConfigurationFactory.getJaccConfigurationFactory().registerContextProvider(
+          //      getAppContextId(sce.getServletContext()),
+            //    new TestPolicyConfigurationFactory());
 
+        PolicyFactory policyFactory = PolicyFactory.getPolicyFactory();
+        policyFactory.setPolicy(new LoggingTestPolicy(policyFactory.getPolicy()));
     }
 
     private String getAppContextId(ServletContext servletContext) {

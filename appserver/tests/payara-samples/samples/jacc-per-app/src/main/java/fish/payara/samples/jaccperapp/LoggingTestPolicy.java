@@ -23,12 +23,18 @@ import org.omnifaces.jaccprovider.TestPolicy;
  * @author Arjan Tijms
  *
  */
-public class LoggingTestPolicy extends TestPolicy {
+public class LoggingTestPolicy implements Policy {
 
     public static final ConcurrentLinkedQueue<Permission> loggedPermissions = new ConcurrentLinkedQueue<>();
 
+    private final Policy originalPolicy;
+    
+    public LoggingTestPolicy(Policy originalPolicy) {
+        this.originalPolicy = originalPolicy;
+    }
+
     @Override
-    public boolean implies(ProtectionDomain domain, Permission permission) {
+    public boolean implies(Permission permission, Subject subject) {
 
         if (permission instanceof WebResourcePermission || permission instanceof WebRoleRefPermission || permission instanceof WebUserDataPermission) {
             // Only for test! Don't log like this in an actual application!
@@ -36,7 +42,7 @@ public class LoggingTestPolicy extends TestPolicy {
             System.out.println(permission);
         }
 
-        return super.implies(domain, permission);
+        return originalPolicy.implies(permission, subject);
     }
 
 }
