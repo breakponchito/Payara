@@ -3,6 +3,7 @@
 package fish.payara.samples.jaccperapp;
 
 import java.security.Permission;
+import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
