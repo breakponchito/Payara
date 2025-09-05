@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebListener;
 import org.omnifaces.jaccprovider.TestPolicyConfigurationFactory;
 
 import fish.payara.jacc.JaccConfigurationFactory;
+import jakarta.security.jacc.PolicyFactory;
 
 /**
  * The core of this sample; installing our own JACC Policy for the current web application.

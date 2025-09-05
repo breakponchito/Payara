@@ -11,6 +11,7 @@ import jakarta.security.jacc.WebRoleRefPermission;
 import jakarta.security.jacc.WebUserDataPermission;
 
 import jakarta.security.jacc.Policy;
+import javax.security.auth.Subject;
 
 /**
  * Test policy used for easy testing that the policy is indeed used.
@@ -43,6 +44,11 @@ public class LoggingTestPolicy implements Policy {
         }
 
         return originalPolicy.implies(permission, subject);
+    }
+
+    @Override
+    public PermissionCollection getPermissionCollection(Subject subject) {
+        return originalPolicy.getPermissionCollection(subject);
     }
 
 }
