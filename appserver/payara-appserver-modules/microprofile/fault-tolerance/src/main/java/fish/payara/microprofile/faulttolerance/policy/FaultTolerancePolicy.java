@@ -143,7 +143,7 @@ public final class FaultTolerancePolicy implements Serializable {
         return new FaultTolerancePolicy(
                 config.isNonFallbackEnabled(),
                 config.isMetricsEnabled(),
-                AsynchronousPolicy.create(context, config),
+                 AsynchronousPolicy.create(context, config),
                 BulkheadPolicy.create(context, config),
                 CircuitBreakerPolicy.create(context, config),
                 FallbackPolicy.create(context, config),

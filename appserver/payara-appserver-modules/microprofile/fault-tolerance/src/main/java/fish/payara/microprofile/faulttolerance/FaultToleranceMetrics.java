@@ -107,7 +107,9 @@ public interface FaultToleranceMetrics {
             
             LongCounter longCounter = currentMeter.counterBuilder("ft.invocations.total").setDescription("The number of times the method was called.").build();
             AttributeKey<String> key = AttributeKey.stringKey("fallback");
-            Attributes attribute = Attributes.builder().put(key, "notApplied").build();
+            AttributeKey<String> resultKey = AttributeKey.stringKey("result");
+            Attributes attribute = Attributes.builder().putAll(methodAttribute).put(key, "notApplied").put(resultKey, "valueReturned").build();
+            
             longCounter.add(1, attribute);
             
             if (policy.isRetryPresent()) {
