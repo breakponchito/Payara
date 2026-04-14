@@ -39,14 +39,12 @@
  */
 package fish.payara.microprofile.faulttolerance;
 
+import static fish.payara.microprofile.faulttolerance.FaultToleranceTelemetryMetricsRecorder.createFTInvocationTotalMeter;
 import static java.util.Arrays.asList;
 import static org.glassfish.internal.api.Globals.getDefaultHabitat;
 
 import fish.payara.microprofile.faulttolerance.service.FaultToleranceMethodContextImpl;
 import fish.payara.opentracing.OpenTelemetryService;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,16 +99,9 @@ public interface FaultToleranceMetrics {
                 {"result", "valueReturned", "exceptionThrown"}, fallbackTag});
             //place to register telemetry ft.invocations.total
             Meter currentMeter = openTelemetryService.getCurrentMeter();
-            FaultToleranceMethodContextImpl  faultToleranceMethodContext =(FaultToleranceMethodContextImpl) context;
+            FaultToleranceMethodContextImpl faultToleranceMethodContext = (FaultToleranceMethodContextImpl) context;
             String classAndMethodName = faultToleranceMethodContext.getClassName() + "." + faultToleranceMethodContext.getMethodName();
-            Attributes methodAttribute = Attributes.builder().put(AttributeKey.stringKey("method"), classAndMethodName).build();
-            
-            LongCounter longCounter = currentMeter.counterBuilder("ft.invocations.total").setDescription("The number of times the method was called.").build();
-            AttributeKey<String> key = AttributeKey.stringKey("fallback");
-            AttributeKey<String> resultKey = AttributeKey.stringKey("result");
-            Attributes attribute = Attributes.builder().putAll(methodAttribute).put(key, "notApplied").put(resultKey, "valueReturned").build();
-            
-            longCounter.add(1, attribute);
+            createFTInvocationTotalMeter(classAndMethodName, currentMeter);
             
             if (policy.isRetryPresent()) {
                 List<String> retryResultTag = new ArrayList<>(asList("retryResult", "valueReturned", "exceptionNotRetryable"));
