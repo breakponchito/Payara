@@ -39,7 +39,7 @@
  */
 package fish.payara.microprofile.faulttolerance;
 
-import static fish.payara.microprofile.faulttolerance.FaultToleranceTelemetryMetricsRecorder.createFTInvocationTotalMeter;
+import static fish.payara.microprofile.faulttolerance.FaultToleranceTelemetryMetricsRecorder.*;
 import static java.util.Arrays.asList;
 import static org.glassfish.internal.api.Globals.getDefaultHabitat;
 
@@ -114,6 +114,9 @@ public interface FaultToleranceMetrics {
                 register(Counter.class.getTypeName(), "ft.retry.calls.total", new String[][]{
                     {"retried", "true", "false"}, retryResultTag.toArray(new String[0])});
                 register(Counter.class.getTypeName(), "ft.retry.retries.total");
+                //place to register telemetry ft.retry.calls.total and ft.retry.retries.total
+                createFTRetryCallsTotal(classAndMethodName, currentMeter);
+                createFTRetryRetriesTotal(classAndMethodName, currentMeter);
             }
             if (policy.isTimeoutPresent()) {
                 register(Counter.class.getTypeName(), "ft.timeout.calls.total", new String[][] {
