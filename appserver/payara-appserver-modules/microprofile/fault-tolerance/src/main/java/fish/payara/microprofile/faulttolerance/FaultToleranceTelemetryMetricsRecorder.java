@@ -51,7 +51,8 @@ public class FaultToleranceTelemetryMetricsRecorder {
     public static void createFTRetryCallsTotal(String classAndMethodName, Meter currentMeter) {
         LongCounter longCounter = currentMeter.counterBuilder(FT_RETRY_CALLS_TOTAL).setDescription(FT_RETRY_CALLS_TOTAL_DESCRIPTION).build();
         AttributeKey<String> key = AttributeKey.stringKey("retryResult");
-        Attributes attributes = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "valueReturned").build();
+        AttributeKey<String> retriedKey = AttributeKey.stringKey("retried");
+        Attributes attributes = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "valueReturned").put(retriedKey, "false").build();
         longCounter.add(1, attributes);
     }
 
