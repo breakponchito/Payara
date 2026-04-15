@@ -132,14 +132,10 @@ public class FaultToleranceTelemetryMetricsRecorder {
 
     /**
      * this method will help to report ft.circuitbreaker.calls.total metric for Fault Tolerance using Telemetry api
-     * @param classAndMethodName
      * @param currentMeter
      */
-    public static void createFTCircuitBreakerCallsTotal(String classAndMethodName, Meter currentMeter) {
-        LongCounter longCounter = currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_CALLS_TOTAL).setDescription(FT_CIRCUIT_BREAKER_CALLS_TOTAL_DESCRIPTION).build();
-        AttributeKey<String> key = AttributeKey.stringKey("circuitBreakerResult");
-        Attributes attributes = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "success").build();
-        longCounter.add(1, attributes);       
+    public static LongCounter createFTCircuitBreakerCallsTotal(Meter currentMeter) {
+        return currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_CALLS_TOTAL).setDescription(FT_CIRCUIT_BREAKER_CALLS_TOTAL_DESCRIPTION).build();
     }
     
     public static void createFTCircuitBreakerStateTotal(String classAndMethodName, Meter currentMeter) {

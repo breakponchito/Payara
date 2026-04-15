@@ -42,6 +42,8 @@ package fish.payara.microprofile.faulttolerance.service;
 import static java.lang.System.arraycopy;
 import static org.eclipse.microprofile.metrics.MetricUnits.NANOSECONDS;
 
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,6 +81,10 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     private final Map<MetricID, Histogram> histogramsByMetricID;
     private FallbackUsage fallbackUsage;
     private boolean retried;
+    
+    //define metrics used for execution time 
+    private LongCounter ftCircuitBreakerCallsTotal = null;
+    private String classAndMethodName = null;
 
     public MethodFaultToleranceMetrics(MetricRegistry registry, String canonicalMethodName) {
         this(registry, canonicalMethodName, FallbackUsage.notDefined, new AtomicBoolean(), new ConcurrentHashMap<>(),
@@ -226,5 +232,33 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     @Override
     public boolean isRetried() {
         return retried;
+    }
+
+
+    @Override
+    public void addCircuitBreakerCallsTotal(LongCounter circuitBreakerCallsTotal) {
+        this.ftCircuitBreakerCallsTotal = circuitBreakerCallsTotal;
+    }
+
+    @Override
+    public void incrementCircuitBreakerCallsSuccessCount(LongCounter circuitBreakerCallsSuccessCount, Attributes attributes) {
+        if (circuitBreakerCallsSuccessCount != null) {
+            circuitBreakerCallsSuccessCount.add(1, attributes);
+        }
+    }
+
+    @Override
+    public void setClassAndMethodName(String classAndMethodName) {
+        this.classAndMethodName = classAndMethodName;
+    }
+
+    @Override
+    public LongCounter getCircuitBreakerCallsTotal() {
+        return ftCircuitBreakerCallsTotal;
+    }
+    
+    @Override
+    public String getClassAndMethodName() {
+        return classAndMethodName;
     }
 }
