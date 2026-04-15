@@ -4,6 +4,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
+import java.util.List;
 
 /**
  * Class to define methods to register Telemetry Metrics for FaultTolerance
@@ -40,6 +41,7 @@ public class FaultToleranceTelemetryMetricsRecorder {
     private static final String FT_TIMEOUT_EXECUTION_DURATION_DESCRIPTION = """
             Histogram of the execution duration of the method.
             """;
+    private static final List<Double> HISTOGRAM_BUCKETS = List.of(0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0);
 
     /**
      * this method will help to report ft.invocations.total metric for Fault Tolerance using Telemetry api
@@ -94,7 +96,8 @@ public class FaultToleranceTelemetryMetricsRecorder {
      * @param currentMeter
      */
     public static void createFTTimeoutExecutionDuration(String classAndMethodName, Meter currentMeter) {
-        currentMeter.histogramBuilder(FT_TIMEOUT_EXECUTION_DURATION).setDescription(FT_TIMEOUT_EXECUTION_DURATION_DESCRIPTION).build();
+        currentMeter.histogramBuilder(FT_TIMEOUT_EXECUTION_DURATION).setDescription(FT_TIMEOUT_EXECUTION_DURATION_DESCRIPTION)
+                .setUnit("seconds").setExplicitBucketBoundariesAdvice(HISTOGRAM_BUCKETS).build();
     }
 
 

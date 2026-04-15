@@ -122,6 +122,8 @@ public interface FaultToleranceMetrics {
                 register(Counter.class.getTypeName(), "ft.timeout.calls.total", new String[][] {
                     {"timedOut", "true", "false"}});
                 register(Histogram.class.getTypeName(), "ft.timeout.executionDuration");
+                createFTTimeoutCallsTotal(classAndMethodName, currentMeter);
+                createFTTimeoutExecutionDuration(classAndMethodName, currentMeter);
             }
             if (policy.isCircuitBreakerPresent()) {
                 register(Counter.class.getTypeName(), "ft.circuitbreaker.calls.total", new String[][] {
