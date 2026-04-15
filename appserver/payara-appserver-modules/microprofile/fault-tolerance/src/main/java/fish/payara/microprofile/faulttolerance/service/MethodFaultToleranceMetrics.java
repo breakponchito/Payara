@@ -131,7 +131,8 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
         }
         return new MethodFaultToleranceMetrics(registry, canonicalMethodName,
                 policy.isFallbackPresent() ? FallbackUsage.notApplied : FallbackUsage.notDefined,
-                registered, countersByMetricID, histogramsByMetricID, metrics.getCircuitBreakerCallsTotal(), metrics.getClassAndMethodName());
+                registered, countersByMetricID, histogramsByMetricID, metrics != null ? metrics.getCircuitBreakerCallsTotal() : null, 
+                metrics != null ? metrics.getClassAndMethodName() : null);
     }
 
     /*
