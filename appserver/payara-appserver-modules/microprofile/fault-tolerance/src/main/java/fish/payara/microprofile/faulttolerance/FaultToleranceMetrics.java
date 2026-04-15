@@ -91,6 +91,7 @@ public interface FaultToleranceMetrics {
      */
     default FaultToleranceMetrics boundTo(FaultToleranceMethodContext context, FaultTolerancePolicy policy) {
         if (policy.isMetricsEnabled) {
+            long startTime = System.nanoTime();
             OpenTelemetryService openTelemetryService = getDefaultHabitat().getService(OpenTelemetryService.class);
             String[] fallbackTag = policy.isFallbackPresent()
                     ? new String[] {"fallback", "applied", "notApplied"}
@@ -123,7 +124,7 @@ public interface FaultToleranceMetrics {
                     {"timedOut", "true", "false"}});
                 register(Histogram.class.getTypeName(), "ft.timeout.executionDuration");
                 createFTTimeoutCallsTotal(classAndMethodName, currentMeter);
-                createFTTimeoutExecutionDuration(classAndMethodName, currentMeter);
+                createFTTimeoutExecutionDuration(classAndMethodName, currentMeter, startTime);
             }
             if (policy.isCircuitBreakerPresent()) {
                 register(Counter.class.getTypeName(), "ft.circuitbreaker.calls.total", new String[][] {
@@ -133,6 +134,7 @@ public interface FaultToleranceMetrics {
                 register("ft.circuitbreaker.state.total", MetricUnits.NANOSECONDS, state::nanosHalfOpen, "state", "halfOpen");
                 register("ft.circuitbreaker.state.total", MetricUnits.NANOSECONDS, state::nanosClosed, "state", "closed");
                 register(Counter.class.getTypeName(), "ft.circuitbreaker.opened.total");
+                createFTCircuitBreakerCallsTotal(classAndMethodName, currentMeter);
             }
             if (policy.isBulkheadPresent()) {
                 register(Counter.class.getTypeName(), "ft.bulkhead.calls.total", new String[][] {
@@ -148,6 +150,10 @@ public interface FaultToleranceMetrics {
                     AtomicInteger running = context.getQueuingOrRunningPopulation();
                     register("ft.bulkhead.executionsRunning", null, running::get);
                 }
+                createFTBulkheadCallsTotal(classAndMethodName, currentMeter);
+                createFTBulkheadExecutionDuration(classAndMethodName, currentMeter);
+                createFTBulkheadRunningDuration(classAndMethodName, currentMeter);
+                createFTBulkheadExecutionWaiting(classAndMethodName, currentMeter);
             }
         }
         return this;
