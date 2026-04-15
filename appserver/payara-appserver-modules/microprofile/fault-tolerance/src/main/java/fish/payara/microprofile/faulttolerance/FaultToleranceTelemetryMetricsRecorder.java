@@ -168,7 +168,7 @@ public class FaultToleranceTelemetryMetricsRecorder {
      */
     public static void createFTBulkheadExecutionsRunning(String classAndMethodName, Meter currentMeter) {
         LongUpDownCounter longUpDownCounter = currentMeter.upDownCounterBuilder(FT_BULKHEAD_EXECUTIONS_RUNNING).setDescription(FT_BULKHEAD_EXECUTIONS_RUNNING_DESCRIPTION).build();
-        longUpDownCounter.add(1, getMethodAttribute(classAndMethodName));
+        longUpDownCounter.add(0, getMethodAttribute(classAndMethodName));
     }
 
     /**
@@ -176,8 +176,11 @@ public class FaultToleranceTelemetryMetricsRecorder {
      * @param classAndMethodName
      * @param currentMeter
      */
-    public static void createFTBulkheadRunningDuration(String classAndMethodName, Meter currentMeter) {
-        currentMeter.histogramBuilder(FT_BULKHEAD_RUNNING_DURATION).setDescription(FT_BULKHEAD_RUNNING_DURATION_DESCRIPTION).build();      
+    public static void createFTBulkheadRunningDuration(String classAndMethodName, Meter currentMeter, long startTime) {
+        DoubleHistogram doubleHistogram = currentMeter.histogramBuilder(FT_BULKHEAD_RUNNING_DURATION).setDescription(FT_BULKHEAD_RUNNING_DURATION_DESCRIPTION)
+                .setUnit("seconds").setExplicitBucketBoundariesAdvice(HISTOGRAM_BUCKETS).build();
+        double seconds = System.nanoTime() - startTime;
+        doubleHistogram.record(seconds / 1_000_000_000d, getMethodAttribute(classAndMethodName));
     }
 
     /**
@@ -186,11 +189,10 @@ public class FaultToleranceTelemetryMetricsRecorder {
      * @param currentMeter
      */
     public static void createFTBulkheadExecutionWaiting(String classAndMethodName, Meter currentMeter) {
-        currentMeter.upDownCounterBuilder(FT_BULKHEAD_EXECUTION_WAITING).setDescription(FT_BULKHEAD_EXECUTION_WAITING_DESCRIPTION).build();       
+        LongUpDownCounter longUpDownCounter = currentMeter.upDownCounterBuilder(FT_BULKHEAD_EXECUTION_WAITING).setDescription(FT_BULKHEAD_EXECUTION_WAITING_DESCRIPTION).build();
+        longUpDownCounter.add(0, getMethodAttribute(classAndMethodName));
     }
     
-    
-
 
     public static Attributes getMethodAttribute(String classAndMethodName) {
         return Attributes.builder().put(AttributeKey.stringKey(METHOD_ATTRIBUTE_NAME), classAndMethodName).build();

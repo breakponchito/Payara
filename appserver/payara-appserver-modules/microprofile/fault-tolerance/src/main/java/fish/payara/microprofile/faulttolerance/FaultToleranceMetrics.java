@@ -153,7 +153,7 @@ public interface FaultToleranceMetrics {
                 }
                 createFTBulkheadCallsTotal(classAndMethodName, currentMeter);
                 createFTBulkheadExecutionsRunning(classAndMethodName, currentMeter);
-                createFTBulkheadRunningDuration(classAndMethodName, currentMeter);
+                createFTBulkheadRunningDuration(classAndMethodName, currentMeter, startTime);
                 createFTBulkheadExecutionWaiting(classAndMethodName, currentMeter);
             }
         }
