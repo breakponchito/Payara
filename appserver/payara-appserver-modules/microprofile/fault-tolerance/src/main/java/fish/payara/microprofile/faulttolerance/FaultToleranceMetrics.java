@@ -152,7 +152,7 @@ public interface FaultToleranceMetrics {
                     register("ft.bulkhead.executionsRunning", null, running::get);
                 }
                 createFTBulkheadCallsTotal(classAndMethodName, currentMeter);
-                createFTBulkheadExecutionDuration(classAndMethodName, currentMeter);
+                createFTBulkheadExecutionsRunning(classAndMethodName, currentMeter);
                 createFTBulkheadRunningDuration(classAndMethodName, currentMeter);
                 createFTBulkheadExecutionWaiting(classAndMethodName, currentMeter);
             }

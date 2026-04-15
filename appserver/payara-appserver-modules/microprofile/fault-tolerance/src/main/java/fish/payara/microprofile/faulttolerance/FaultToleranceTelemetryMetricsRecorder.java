@@ -4,6 +4,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.Meter;
 import java.util.List;
 
@@ -165,8 +166,9 @@ public class FaultToleranceTelemetryMetricsRecorder {
      * @param classAndMethodName
      * @param currentMeter
      */
-    public static void createFTBulkheadRunningDuration(String classAndMethodName, Meter currentMeter) {
-        currentMeter.upDownCounterBuilder(FT_BULKHEAD_EXECUTIONS_RUNNING).setDescription(FT_BULKHEAD_EXECUTIONS_RUNNING_DESCRIPTION).build();
+    public static void createFTBulkheadExecutionsRunning(String classAndMethodName, Meter currentMeter) {
+        LongUpDownCounter longUpDownCounter = currentMeter.upDownCounterBuilder(FT_BULKHEAD_EXECUTIONS_RUNNING).setDescription(FT_BULKHEAD_EXECUTIONS_RUNNING_DESCRIPTION).build();
+        longUpDownCounter.add(1, getMethodAttribute(classAndMethodName));
     }
 
     /**
@@ -174,7 +176,7 @@ public class FaultToleranceTelemetryMetricsRecorder {
      * @param classAndMethodName
      * @param currentMeter
      */
-    public static void createFTBulkheadExecutionDuration(String classAndMethodName, Meter currentMeter) {
+    public static void createFTBulkheadRunningDuration(String classAndMethodName, Meter currentMeter) {
         currentMeter.histogramBuilder(FT_BULKHEAD_RUNNING_DURATION).setDescription(FT_BULKHEAD_RUNNING_DURATION_DESCRIPTION).build();      
     }
 
