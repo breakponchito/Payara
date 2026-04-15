@@ -135,6 +135,7 @@ public interface FaultToleranceMetrics {
                 register("ft.circuitbreaker.state.total", MetricUnits.NANOSECONDS, state::nanosClosed, "state", "closed");
                 register(Counter.class.getTypeName(), "ft.circuitbreaker.opened.total");
                 createFTCircuitBreakerCallsTotal(classAndMethodName, currentMeter);
+                createFTCircuitBreakerStateTotal(classAndMethodName, currentMeter);
             }
             if (policy.isBulkheadPresent()) {
                 register(Counter.class.getTypeName(), "ft.bulkhead.calls.total", new String[][] {

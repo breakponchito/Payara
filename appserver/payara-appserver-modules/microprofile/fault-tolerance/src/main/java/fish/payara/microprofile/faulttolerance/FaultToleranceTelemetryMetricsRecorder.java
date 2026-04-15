@@ -49,6 +49,10 @@ public class FaultToleranceTelemetryMetricsRecorder {
     private static final String FT_CIRCUIT_BREAKER_CALLS_TOTAL_DESCRIPTION = """
             The number of times the circuit breaker logic was run.
             """;
+    private static final String FT_CIRCUIT_BREAKER_STATE_TOTAL= "ft.circuitbreaker.state.total";
+    private static final String FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION = """
+            Amount of time the circuit breaker spent in each state.
+            """;
     //bulkhead
     private static final String FT_BULKHEAD_CALLS_TOTAL = "ft.bulkhead.calls.total";
     private static final String FT_BULKHEAD_CALLS_TOTAL_DESCRIPTION = """
@@ -135,6 +139,13 @@ public class FaultToleranceTelemetryMetricsRecorder {
         AttributeKey<String> key = AttributeKey.stringKey("circuitBreakerResult");
         Attributes attributes = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "success").build();
         longCounter.add(1, attributes);       
+    }
+    
+    public static void createFTCircuitBreakerStateTotal(String classAndMethodName, Meter currentMeter) {
+        LongCounter longCounter = currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_STATE_TOTAL).setDescription(FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION).build();
+        AttributeKey<String> key = AttributeKey.stringKey("state");
+        Attributes attributes = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "closed").build();
+        longCounter.add(1, attributes);      
     }
 
     /**
