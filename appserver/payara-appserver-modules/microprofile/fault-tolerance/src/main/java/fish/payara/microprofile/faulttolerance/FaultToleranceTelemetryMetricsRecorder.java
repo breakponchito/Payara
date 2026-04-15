@@ -29,6 +29,17 @@ public class FaultToleranceTelemetryMetricsRecorder {
     private static final String FT_RETRY_RETRIES_TOTAL_DESCRIPTION = """
             The number of time the method was retried.
             """;
+    
+    //timeout metrics
+    private static final String  FT_TIMEOUT_CALLS_TOTAL = "ft.timeout.calls.total";
+    private static final String FT_TIMEOUT_CALLS_TOTAL_DESCRIPTION = """
+            The number of times the timeout logic was run.
+            """;
+    
+    private static final String FT_TIMEOUT_EXECUTION_DURATION = "ft.timeout.executionDuration";
+    private static final String FT_TIMEOUT_EXECUTION_DURATION_DESCRIPTION = """
+            Histogram of the execution duration of the method.
+            """;
 
     /**
      * this method will help to report ft.invocations.total metric for Fault Tolerance using Telemetry api
@@ -63,6 +74,27 @@ public class FaultToleranceTelemetryMetricsRecorder {
      */
     public static void createFTRetryRetriesTotal(String classAndMethodName, Meter currentMeter) {
         currentMeter.counterBuilder(FT_RETRY_RETRIES_TOTAL).setDescription(FT_RETRY_RETRIES_TOTAL_DESCRIPTION).build();
+    }
+
+    /**
+     * this method will help to report ft.timeout.calls.total metric for Fault Tolerance using Telemetry api
+     * @param classAndMethodName
+     * @param currentMeter
+     */
+    public static void createFTTimeoutCallsTotal(String classAndMethodName, Meter currentMeter) {
+        LongCounter longCounter = currentMeter.counterBuilder(FT_TIMEOUT_CALLS_TOTAL).setDescription(FT_TIMEOUT_CALLS_TOTAL_DESCRIPTION).build();
+        AttributeKey<String> key = AttributeKey.stringKey("timedOut");
+        Attributes attributes = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "false").build();
+        longCounter.add(1, attributes);
+    }
+
+    /**
+     * this method will help to report ft.timeout.executionDuration metric for Fault Tolerance using Telemetry api
+     * @param classAndMethodName
+     * @param currentMeter
+     */
+    public static void createFTTimeoutExecutionDuration(String classAndMethodName, Meter currentMeter) {
+        currentMeter.histogramBuilder(FT_TIMEOUT_EXECUTION_DURATION).setDescription(FT_TIMEOUT_EXECUTION_DURATION_DESCRIPTION).build();
     }
 
 
