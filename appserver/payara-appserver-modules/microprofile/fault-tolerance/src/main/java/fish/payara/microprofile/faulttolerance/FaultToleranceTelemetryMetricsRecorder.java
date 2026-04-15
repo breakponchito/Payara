@@ -42,19 +42,29 @@ public class FaultToleranceTelemetryMetricsRecorder {
         Attributes attribute = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "notApplied").put(resultKey, "valueReturned").build();
         longCounter.add(1, attribute);
     }
-    
+
+    /**
+     * this method will help to report ft.retry.calls.total metric for Fault Tolerance using Telemetry api
+     * @param classAndMethodName
+     * @param currentMeter
+     */
     public static void createFTRetryCallsTotal(String classAndMethodName, Meter currentMeter) {
         LongCounter longCounter = currentMeter.counterBuilder(FT_RETRY_CALLS_TOTAL).setDescription(FT_RETRY_CALLS_TOTAL_DESCRIPTION).build();
         AttributeKey<String> key = AttributeKey.stringKey("retryResult");
         Attributes attributes = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "valueReturned").build();
         longCounter.add(1, attributes);
     }
-    
+
+    /**
+     * this method will help to report ft.retry.retries.total metric for Fault Tolerance using Telemetry api
+     * @param classAndMethodName
+     * @param currentMeter
+     */
     public static void createFTRetryRetriesTotal(String classAndMethodName, Meter currentMeter) {
         currentMeter.counterBuilder(FT_RETRY_RETRIES_TOTAL).setDescription(FT_RETRY_RETRIES_TOTAL_DESCRIPTION).build();
     }
-    
-    
+
+
     public static Attributes getMethodAttribute(String classAndMethodName) {
         return Attributes.builder().put(AttributeKey.stringKey(METHOD_ATTRIBUTE_NAME), classAndMethodName).build();
     }
