@@ -101,6 +101,22 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
         this.histogramsByMetricID = histogramsByMetricID;
     }
 
+    private MethodFaultToleranceMetrics(MetricRegistry registry, String canonicalMethodName, FallbackUsage fallbackUsage,
+                                        AtomicBoolean registered, Map<MetricID, Counter> countersByMetricID, 
+                                        Map<MetricID, Histogram> histogramsByMetricID,
+                                        LongCounter ftCircuitBreakerCallsTotal, String classAndMethodName) {
+        this.registry = registry;
+        this.canonicalMethodName = canonicalMethodName;
+        this.fallbackUsage = fallbackUsage;
+        this.registered = registered;
+        this.countersByMetricID = countersByMetricID;
+        this.histogramsByMetricID = histogramsByMetricID;
+        this.ftCircuitBreakerCallsTotal = ftCircuitBreakerCallsTotal;
+        this.classAndMethodName = classAndMethodName;   
+    }
+    
+    
+
     /**
      * The first thread calling creates the metrics all thread calling the same method work with. Other threads have to
      * wait until these metrics actually exist. The easiest to make that happen was to make this method synchronised.
@@ -109,12 +125,13 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
      */
     @Override
     public synchronized FaultToleranceMetrics boundTo(FaultToleranceMethodContext context, FaultTolerancePolicy policy) {
+        FaultToleranceMetrics metrics = null;
         if (registered.compareAndSet(false, true)) {
-            FaultToleranceMetrics.super.boundTo(context, policy); // trigger registration if needed
+            metrics = FaultToleranceMetrics.super.boundTo(context, policy); // trigger registration if needed
         }
         return new MethodFaultToleranceMetrics(registry, canonicalMethodName,
                 policy.isFallbackPresent() ? FallbackUsage.notApplied : FallbackUsage.notDefined,
-                registered, countersByMetricID, histogramsByMetricID);
+                registered, countersByMetricID, histogramsByMetricID, metrics.getCircuitBreakerCallsTotal(), metrics.getClassAndMethodName());
     }
 
     /*
