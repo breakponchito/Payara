@@ -159,7 +159,7 @@ public class FaultToleranceTelemetryMetricsRecorder {
                 .setDescription(FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION).build();
         LongCounter longCounterOpen = currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_STATE_TOTAL).setUnit("nanoseconds")
                 .setDescription(FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION).build();
-        longCounterClosed.add(0, Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put("state", "closed").build());
+        longCounterClosed.add(1, Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put("state", "closed").build());
         longCounterHalfOpen.add(0, Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put("state", "halfOpen").build()); 
         longCounterOpen.add(0, Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put("state", "open").build());
     }
