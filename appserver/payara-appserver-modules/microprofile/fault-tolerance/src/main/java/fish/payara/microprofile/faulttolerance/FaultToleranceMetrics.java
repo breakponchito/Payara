@@ -175,7 +175,7 @@ public interface FaultToleranceMetrics {
             Meter currentMeter = openTelemetryService.getCurrentMeter();
             FaultToleranceMethodContextImpl faultToleranceMethodContext = (FaultToleranceMethodContextImpl) context;
             setClassAndMethodName(faultToleranceMethodContext.getClassName() + "." + faultToleranceMethodContext.getMethodName());
-            addFTInvocationTotalMeter(createFTInvocationTotalMeter(currentMeter));
+            addFTInvocationTotalMeter(createFTInvocationTotalMeter(getClassAndMethodName(), currentMeter, policy.isFallbackPresent()));
             
             if (policy.isRetryPresent()) {
                 List<String> retryResultTag = new ArrayList<>(asList("retryResult", "valueReturned", "exceptionNotRetryable"));

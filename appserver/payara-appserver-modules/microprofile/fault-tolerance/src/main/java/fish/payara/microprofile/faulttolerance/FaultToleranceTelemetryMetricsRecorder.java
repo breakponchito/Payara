@@ -79,8 +79,15 @@ public class FaultToleranceTelemetryMetricsRecorder {
      * this method will help to report ft.invocations.total metric for Fault Tolerance using Telemetry api
      * @param currentMeter
      */
-    public static LongCounter createFTInvocationTotalMeter(Meter currentMeter) {
-        return currentMeter.counterBuilder(FT_INVOCATIONS_TOTAL).setDescription(FT_INVOCATIONS_TOTAL_DESCRIPTION).build();
+    public static LongCounter createFTInvocationTotalMeter(String classAndMethodName, Meter currentMeter, boolean isFallback) {
+        LongCounter longCounter = currentMeter.counterBuilder(FT_INVOCATIONS_TOTAL).setDescription(FT_INVOCATIONS_TOTAL_DESCRIPTION).build();
+        if (isFallback) {
+            longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                            .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "valueReturned")
+                    .put(AttributeKey.stringKey("fallback"), "notApplied").build());
+            
+        }
+        return longCounter;
     }
 
     /**
