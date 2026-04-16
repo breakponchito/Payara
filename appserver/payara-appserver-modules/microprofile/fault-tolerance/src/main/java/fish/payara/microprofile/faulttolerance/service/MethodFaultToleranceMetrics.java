@@ -266,6 +266,20 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     }
 
     @Override
+    public void incrementCircuitBreakerCallsFailureCount(LongCounter circuitBreakerCallsFailureCount, Attributes attributes) {
+        if (circuitBreakerCallsFailureCount != null) {
+            circuitBreakerCallsFailureCount.add(1, attributes);
+        }
+    }
+
+    @Override
+    public void incrementCircuitBreakerCallsCircuitOpenCount(LongCounter circuitBreakerStateTotal, Attributes attributes) {
+        if (circuitBreakerStateTotal != null) {
+            circuitBreakerStateTotal.add(1, attributes);
+        }
+    }
+
+    @Override
     public void setClassAndMethodName(String classAndMethodName) {
         this.classAndMethodName = classAndMethodName;
     }

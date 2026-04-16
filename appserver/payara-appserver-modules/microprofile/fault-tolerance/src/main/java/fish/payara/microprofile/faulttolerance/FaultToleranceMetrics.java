@@ -97,6 +97,16 @@ public interface FaultToleranceMetrics {
         }
 
         @Override
+        public void incrementCircuitBreakerCallsFailureCount(LongCounter circuitBreakerCallsFailureCount, Attributes attributes) {
+            
+        }
+
+        @Override
+        public void incrementCircuitBreakerCallsCircuitOpenCount(LongCounter circuitBreakerStateTotal, Attributes attributes) {
+            
+        }
+
+        @Override
         public void setClassAndMethodName(String classAndMethodName) {
 
         }
@@ -403,6 +413,9 @@ public interface FaultToleranceMetrics {
     default void incrementCircuitbreakerCallsFailedTotal() {
         incrementCounter("ft.circuitbreaker.calls.total",
                 new Tag("circuitBreakerResult", "failure"));
+        incrementCircuitBreakerCallsFailureCount(getCircuitBreakerCallsTotal(), 
+                Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                        .stringKey("method"), getClassAndMethodName()).build()).put("circuitBreakerResult", "failure").build());
     }
 
     /**
@@ -414,6 +427,9 @@ public interface FaultToleranceMetrics {
     default void incrementCircuitbreakerCallsPreventedTotal() {
         incrementCounter("ft.circuitbreaker.calls.total",
                 new Tag("circuitBreakerResult", "circuitBreakerOpen"));
+        incrementCircuitBreakerCallsCircuitOpenCount(getCircuitBreakerCallsTotal(), 
+                Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                        .stringKey("method"), getClassAndMethodName()).build()).put("circuitBreakerResult", "circuitBreakerOpen").build());
     }
 
     /**
@@ -483,6 +499,10 @@ public interface FaultToleranceMetrics {
     public LongCounter getCircuitBreakerCallsTotal();
     
     public void incrementCircuitBreakerCallsSuccessCount(LongCounter circuitBreakerCallsSuccessCount, Attributes attributes);
+    
+    public void incrementCircuitBreakerCallsFailureCount(LongCounter circuitBreakerCallsFailureCount, Attributes attributes);
+    
+    public void incrementCircuitBreakerCallsCircuitOpenCount(LongCounter circuitBreakerStateTotal, Attributes attributes);
     
     public void setClassAndMethodName(String classAndMethodName);
     
