@@ -312,6 +312,7 @@ public interface FaultToleranceMetrics {
                 new Tag("fallback", getFallbackUsage().name()));
         incrementInvocationsValueReturnedCounter(getInvocationsValueReturnedCounter(), Attributes.builder().putAll(Attributes.builder().put(AttributeKey
                 .stringKey("method"), getClassAndMethodName()).build()).put("result", "valueReturned").put("fallback", getFallbackUsage().name()).build());
+        incrementFallbackCallsTotal();
     }
 
     /**
