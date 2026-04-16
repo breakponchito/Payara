@@ -146,10 +146,15 @@ public class FaultToleranceTelemetryMetricsRecorder {
     }
     
     public static void createFTCircuitBreakerStateTotal(String classAndMethodName, Meter currentMeter) {
-        LongCounter longCounter = currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_STATE_TOTAL).setDescription(FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION).build();
-        AttributeKey<String> key = AttributeKey.stringKey("state");
-        Attributes attributes = Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put(key, "closed").build();
-        longCounter.add(1, attributes);      
+        LongCounter longCounterClosed = currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_STATE_TOTAL).setUnit("nanoseconds")
+                .setDescription(FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION).build();
+        LongCounter longCounterHalfOpen = currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_STATE_TOTAL).setUnit("nanoseconds")
+                .setDescription(FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION).build();
+        LongCounter longCounterOpen = currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_STATE_TOTAL).setUnit("nanoseconds")
+                .setDescription(FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION).build();
+        longCounterClosed.add(0, Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put("state", "closed").build());
+        longCounterHalfOpen.add(0, Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put("state", "halfOpen").build()); 
+        longCounterOpen.add(0, Attributes.builder().putAll(getMethodAttribute(classAndMethodName)).put("state", "open").build());
     }
 
     /**
