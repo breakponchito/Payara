@@ -82,7 +82,7 @@ public class FaultToleranceTelemetryMetricsRecorder {
     public static LongCounter createFTInvocationTotalMeter(String classAndMethodName, Meter currentMeter, boolean isFallback) {
         LongCounter longCounter = currentMeter.counterBuilder(FT_INVOCATIONS_TOTAL).setDescription(FT_INVOCATIONS_TOTAL_DESCRIPTION).build();
         if (isFallback) {
-            longCounter.add(1, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+            longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
                             .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "valueReturned")
                     .put(AttributeKey.stringKey("fallback"), "notApplied").build());
             longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
@@ -90,7 +90,7 @@ public class FaultToleranceTelemetryMetricsRecorder {
                     .put(AttributeKey.stringKey("fallback"), "notApplied").build());
             
         } else {
-            longCounter.add(1, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+            longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
                             .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "valueReturned")
                     .put(AttributeKey.stringKey("fallback"), "notDefined").build());
             longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
