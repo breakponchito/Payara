@@ -83,6 +83,7 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     private boolean retried;
     
     //define metrics used for execution time 
+    private LongCounter ftInvocationsTotal = null;
     private LongCounter ftCircuitBreakerCallsTotal = null;
     private LongCounter ftCircuitBreakerOpenedTotal = null;
     private String classAndMethodName = null;
@@ -265,6 +266,11 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     }
 
     @Override
+    public void addFTInvocationTotalMeter(LongCounter ftInvocationTotalMeter) {
+        this.ftInvocationsTotal = ftInvocationTotalMeter;
+    }
+
+    @Override
     public void incrementCircuitBreakerCallsSuccessCount(LongCounter circuitBreakerCallsSuccessCount, Attributes attributes) {
         if (circuitBreakerCallsSuccessCount != null) {
             circuitBreakerCallsSuccessCount.add(1, attributes);
@@ -293,6 +299,20 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     }
 
     @Override
+    public void incrementInvocationsValueReturnedCounter(LongCounter invocationsValueReturnedCounter, Attributes attributes) {
+        if (invocationsValueReturnedCounter != null) {
+            invocationsValueReturnedCounter.add(1, attributes);
+        }
+    }
+
+    @Override
+    public void incrementInvocationsExceptionThrownCounter(LongCounter invocationsValueReturnedCounter, Attributes attributes) {
+        if (invocationsValueReturnedCounter != null) {
+            invocationsValueReturnedCounter.add(1, attributes);
+        }  
+    }
+
+    @Override
     public void setClassAndMethodName(String classAndMethodName) {
         this.classAndMethodName = classAndMethodName;
     }
@@ -305,6 +325,11 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     @Override
     public LongCounter getCircuitBreakerOpendTotal() {
         return ftCircuitBreakerOpenedTotal;
+    }
+
+    @Override
+    public LongCounter getInvocationsValueReturnedCounter() {
+        return ftInvocationsTotal;
     }
 
     @Override

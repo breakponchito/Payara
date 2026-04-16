@@ -92,12 +92,22 @@ public interface FaultToleranceMetrics {
         }
 
         @Override
+        public void addFTInvocationTotalMeter(LongCounter ftInvocationTotalMeter) {
+            
+        }
+
+        @Override
         public LongCounter getCircuitBreakerCallsTotal() {
             return null;
         }
 
         @Override
         public LongCounter getCircuitBreakerOpendTotal() {
+            return null;
+        }
+
+        @Override
+        public LongCounter getInvocationsValueReturnedCounter() {
             return null;
         }
 
@@ -119,6 +129,16 @@ public interface FaultToleranceMetrics {
         @Override
         public void incrementCircuitBreakerOpendTotalTelemetry(LongCounter circuitBreakerStateTotal, Attributes attributes) {
             
+        }
+
+        @Override
+        public void incrementInvocationsValueReturnedCounter(LongCounter invocationsValueReturnedCounter, Attributes attributes) {
+            
+        }
+
+        @Override
+        public void incrementInvocationsExceptionThrownCounter(LongCounter invocationsValueReturnedCounter, Attributes attributes) {
+
         }
 
         @Override
@@ -155,7 +175,7 @@ public interface FaultToleranceMetrics {
             Meter currentMeter = openTelemetryService.getCurrentMeter();
             FaultToleranceMethodContextImpl faultToleranceMethodContext = (FaultToleranceMethodContextImpl) context;
             setClassAndMethodName(faultToleranceMethodContext.getClassName() + "." + faultToleranceMethodContext.getMethodName());
-            createFTInvocationTotalMeter(getClassAndMethodName(), currentMeter);
+            addFTInvocationTotalMeter(createFTInvocationTotalMeter(currentMeter));
             
             if (policy.isRetryPresent()) {
                 List<String> retryResultTag = new ArrayList<>(asList("retryResult", "valueReturned", "exceptionNotRetryable"));
@@ -285,6 +305,8 @@ public interface FaultToleranceMetrics {
         incrementCounter("ft.invocations.total",
                 new Tag("result", "valueReturned"),
                 new Tag("fallback", getFallbackUsage().name()));
+        incrementInvocationsValueReturnedCounter(getInvocationsValueReturnedCounter(), Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                .stringKey("method"), getClassAndMethodName()).build()).put("result", "valueReturned").put("fallback", getFallbackUsage().name()).build());
     }
 
     /**
@@ -294,6 +316,8 @@ public interface FaultToleranceMetrics {
         incrementCounter("ft.invocations.total",
                 new Tag("result", "exceptionThrown"),
                 new Tag("fallback", getFallbackUsage().name()));
+        incrementInvocationsExceptionThrownCounter(getInvocationsValueReturnedCounter(), Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                .stringKey("method"), getClassAndMethodName()).build()).put("result", "exceptionThrown").put("fallback", getFallbackUsage().name()).build());
     }
 
     /**
@@ -516,9 +540,13 @@ public interface FaultToleranceMetrics {
     
     public void addCircuitBreakerOpenedTotal(LongCounter circuitBreakerOpenedTotal);
     
+    public void addFTInvocationTotalMeter(LongCounter ftInvocationTotalMeter);
+    
     public LongCounter getCircuitBreakerCallsTotal();
     
     public LongCounter getCircuitBreakerOpendTotal();
+    
+    public LongCounter getInvocationsValueReturnedCounter();
     
     public void incrementCircuitBreakerCallsSuccessCount(LongCounter circuitBreakerCallsSuccessCount, Attributes attributes);
     
@@ -527,6 +555,10 @@ public interface FaultToleranceMetrics {
     public void incrementCircuitBreakerCallsCircuitOpenCount(LongCounter circuitBreakerStateTotal, Attributes attributes);
     
     public void incrementCircuitBreakerOpendTotalTelemetry(LongCounter circuitBreakerOpendTotal, Attributes attributes);
+    
+    public void incrementInvocationsValueReturnedCounter(LongCounter invocationsValueReturnedCounter, Attributes attributes);
+    
+    public void incrementInvocationsExceptionThrownCounter(LongCounter invocationsValueReturnedCounter, Attributes attributes);
     
     public void setClassAndMethodName(String classAndMethodName);
     
