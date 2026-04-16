@@ -150,6 +150,11 @@ public interface FaultToleranceMetrics {
         public String getClassAndMethodName() {
             return "";
         }
+
+        @Override
+        public void setDefaultNotAppliedFallbackUsage() {
+            
+        }
     };
 
     Tag[] NO_TAGS = new Tag[0];
@@ -176,7 +181,7 @@ public interface FaultToleranceMetrics {
             FaultToleranceMethodContextImpl faultToleranceMethodContext = (FaultToleranceMethodContextImpl) context;
             setClassAndMethodName(faultToleranceMethodContext.getClassName() + "." + faultToleranceMethodContext.getMethodName());
             addFTInvocationTotalMeter(createFTInvocationTotalMeter(getClassAndMethodName(), currentMeter, policy.isFallbackPresent()));
-            
+            setDefaultNotAppliedFallbackUsage();
             if (policy.isRetryPresent()) {
                 List<String> retryResultTag = new ArrayList<>(asList("retryResult", "valueReturned", "exceptionNotRetryable"));
                 if (policy.retry.isMaxRetriesSet()) {
@@ -316,6 +321,10 @@ public interface FaultToleranceMetrics {
         incrementCounter("ft.invocations.total",
                 new Tag("result", "exceptionThrown"),
                 new Tag("fallback", getFallbackUsage().name()));
+
+        incrementInvocationsExceptionThrownCounter(getInvocationsValueReturnedCounter(), Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                .stringKey("method"), getClassAndMethodName()).build()).put("result", "exceptionThrown").put("fallback", "notApplied").build());
+        
         incrementInvocationsExceptionThrownCounter(getInvocationsValueReturnedCounter(), Attributes.builder().putAll(Attributes.builder().put(AttributeKey
                 .stringKey("method"), getClassAndMethodName()).build()).put("result", "exceptionThrown").put("fallback", getFallbackUsage().name()).build());
     }
@@ -535,6 +544,8 @@ public interface FaultToleranceMetrics {
     default void incrementFallbackCallsTotal() {
         //NOOP
     }
+    
+    void setDefaultNotAppliedFallbackUsage();
     
     public void addCircuitBreakerCallsTotal(LongCounter circuitBreakerCallsTotal);
     

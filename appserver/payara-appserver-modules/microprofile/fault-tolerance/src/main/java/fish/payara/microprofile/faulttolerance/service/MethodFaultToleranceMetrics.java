@@ -242,6 +242,11 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
         fallbackUsage = FaultToleranceMetrics.FallbackUsage.applied;
     }
 
+    @Override
+    public void setDefaultNotAppliedFallbackUsage() {
+        fallbackUsage = FaultToleranceMetrics.FallbackUsage.notApplied;
+    }
+
     /*
      * @Retry
      */
