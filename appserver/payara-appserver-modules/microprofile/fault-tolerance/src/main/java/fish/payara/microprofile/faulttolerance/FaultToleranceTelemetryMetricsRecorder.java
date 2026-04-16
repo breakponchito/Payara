@@ -79,15 +79,22 @@ public class FaultToleranceTelemetryMetricsRecorder {
      * this method will help to report ft.invocations.total metric for Fault Tolerance using Telemetry api
      * @param currentMeter
      */
-    public static LongCounter createFTInvocationTotalMeter(String classAndMethodName, Meter currentMeter, boolean isFallback) {
+    public static LongCounter createFTInvocationTotalMeter(String classAndMethodName, Meter currentMeter, 
+                                                           boolean isFallback, FaultToleranceMetrics.FallbackUsage fallbackUsage) {
         LongCounter longCounter = currentMeter.counterBuilder(FT_INVOCATIONS_TOTAL).setDescription(FT_INVOCATIONS_TOTAL_DESCRIPTION).build();
         if (isFallback) {
             longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
                             .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "valueReturned")
                     .put(AttributeKey.stringKey("fallback"), "notApplied").build());
             longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                            .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "valueReturned")
+                    .put(AttributeKey.stringKey("fallback"), "applied").build());
+            longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
                             .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "exceptionThrown")
                     .put(AttributeKey.stringKey("fallback"), "notApplied").build());
+            longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                            .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "exceptionThrown")
+                    .put(AttributeKey.stringKey("fallback"), "applied").build());
             
         } else {
             longCounter.add(0, Attributes.builder().putAll(Attributes.builder().put(AttributeKey

@@ -180,8 +180,7 @@ public interface FaultToleranceMetrics {
             Meter currentMeter = openTelemetryService.getCurrentMeter();
             FaultToleranceMethodContextImpl faultToleranceMethodContext = (FaultToleranceMethodContextImpl) context;
             setClassAndMethodName(faultToleranceMethodContext.getClassName() + "." + faultToleranceMethodContext.getMethodName());
-            addFTInvocationTotalMeter(createFTInvocationTotalMeter(getClassAndMethodName(), currentMeter, policy.isFallbackPresent()));
-            setDefaultNotAppliedFallbackUsage();
+            addFTInvocationTotalMeter(createFTInvocationTotalMeter(getClassAndMethodName(), currentMeter, policy.isFallbackPresent(), getFallbackUsage()));
             if (policy.isRetryPresent()) {
                 List<String> retryResultTag = new ArrayList<>(asList("retryResult", "valueReturned", "exceptionNotRetryable"));
                 if (policy.retry.isMaxRetriesSet()) {
@@ -312,7 +311,6 @@ public interface FaultToleranceMetrics {
                 new Tag("fallback", getFallbackUsage().name()));
         incrementInvocationsValueReturnedCounter(getInvocationsValueReturnedCounter(), Attributes.builder().putAll(Attributes.builder().put(AttributeKey
                 .stringKey("method"), getClassAndMethodName()).build()).put("result", "valueReturned").put("fallback", getFallbackUsage().name()).build());
-        incrementFallbackCallsTotal();
     }
 
     /**
