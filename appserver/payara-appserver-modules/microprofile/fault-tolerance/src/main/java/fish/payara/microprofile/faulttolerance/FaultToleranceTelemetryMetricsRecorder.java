@@ -85,6 +85,9 @@ public class FaultToleranceTelemetryMetricsRecorder {
             longCounter.add(1, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
                             .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "valueReturned")
                     .put(AttributeKey.stringKey("fallback"), "notApplied").build());
+            longCounter.add(1, Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                            .stringKey("method"), classAndMethodName).build()).put(AttributeKey.stringKey("result"), "exceptionThrown")
+                    .put(AttributeKey.stringKey("fallback"), "notApplied").build());
             
         }
         return longCounter;
