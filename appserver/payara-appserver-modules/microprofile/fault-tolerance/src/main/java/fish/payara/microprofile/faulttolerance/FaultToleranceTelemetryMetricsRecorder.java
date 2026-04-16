@@ -54,6 +54,10 @@ public class FaultToleranceTelemetryMetricsRecorder {
     private static final String FT_CIRCUIT_BREAKER_STATE_TOTAL_DESCRIPTION = """
             Amount of time the circuit breaker spent in each state.
             """;
+    private static final String FT_CIRCUIT_BREAKER_OPENED_TOTAL = "ft.circuitbreaker.opened.total";
+    private static final String FT_CIRCUIT_BREAKER_OPENED_TOTAL_DESCRIPTION = """
+            Number of times the circuit breaker moved from closed state to open state.
+            """;
     //bulkhead
     private static final String FT_BULKHEAD_CALLS_TOTAL = "ft.bulkhead.calls.total";
     private static final String FT_BULKHEAD_CALLS_TOTAL_DESCRIPTION = """
@@ -136,6 +140,14 @@ public class FaultToleranceTelemetryMetricsRecorder {
      */
     public static LongCounter createFTCircuitBreakerCallsTotal(Meter currentMeter) {
         return currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_CALLS_TOTAL).setDescription(FT_CIRCUIT_BREAKER_CALLS_TOTAL_DESCRIPTION).build();
+    }
+
+    /**
+     * this method will help to report ft.circuitbreaker.opened.total metric for Fault Tolerance using Telemetry api
+     * @param currentMeter
+     */
+    public static LongCounter createFTCircuitBreakerOpenedTotal(Meter currentMeter) {
+        return currentMeter.counterBuilder(FT_CIRCUIT_BREAKER_OPENED_TOTAL).setDescription(FT_CIRCUIT_BREAKER_OPENED_TOTAL_DESCRIPTION).build();
     }
     
     public static void createFTCircuitBreakerStateTotal(String classAndMethodName, Meter currentMeter) {

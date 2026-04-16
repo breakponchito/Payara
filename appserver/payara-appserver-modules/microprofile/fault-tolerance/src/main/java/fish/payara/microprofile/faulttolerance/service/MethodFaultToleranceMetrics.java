@@ -84,6 +84,7 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     
     //define metrics used for execution time 
     private LongCounter ftCircuitBreakerCallsTotal = null;
+    private LongCounter ftCircuitBreakerOpenedTotal = null;
     private String classAndMethodName = null;
 
     public MethodFaultToleranceMetrics(MetricRegistry registry, String canonicalMethodName) {
@@ -259,6 +260,11 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     }
 
     @Override
+    public void addCircuitBreakerOpenedTotal(LongCounter circuitBreakerOpenedTotal) {
+        this.ftCircuitBreakerOpenedTotal = circuitBreakerOpenedTotal;
+    }
+
+    @Override
     public void incrementCircuitBreakerCallsSuccessCount(LongCounter circuitBreakerCallsSuccessCount, Attributes attributes) {
         if (circuitBreakerCallsSuccessCount != null) {
             circuitBreakerCallsSuccessCount.add(1, attributes);
@@ -280,6 +286,13 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     }
 
     @Override
+    public void incrementCircuitBreakerOpendTotalTelemetry(LongCounter circuitBreakerOpendTotal, Attributes attributes) {
+        if (circuitBreakerOpendTotal != null) {
+           circuitBreakerOpendTotal.add(1, attributes); 
+        }
+    }
+
+    @Override
     public void setClassAndMethodName(String classAndMethodName) {
         this.classAndMethodName = classAndMethodName;
     }
@@ -288,7 +301,12 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     public LongCounter getCircuitBreakerCallsTotal() {
         return ftCircuitBreakerCallsTotal;
     }
-    
+
+    @Override
+    public LongCounter getCircuitBreakerOpendTotal() {
+        return ftCircuitBreakerOpenedTotal;
+    }
+
     @Override
     public String getClassAndMethodName() {
         return classAndMethodName;

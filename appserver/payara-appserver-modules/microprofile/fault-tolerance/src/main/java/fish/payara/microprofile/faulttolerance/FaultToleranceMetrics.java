@@ -87,7 +87,17 @@ public interface FaultToleranceMetrics {
         } /* does nothing */
 
         @Override
+        public void addCircuitBreakerOpenedTotal(LongCounter circuitBreakerOpenedTotal) {
+            
+        }
+
+        @Override
         public LongCounter getCircuitBreakerCallsTotal() {
+            return null;
+        }
+
+        @Override
+        public LongCounter getCircuitBreakerOpendTotal() {
             return null;
         }
 
@@ -103,6 +113,11 @@ public interface FaultToleranceMetrics {
 
         @Override
         public void incrementCircuitBreakerCallsCircuitOpenCount(LongCounter circuitBreakerStateTotal, Attributes attributes) {
+            
+        }
+
+        @Override
+        public void incrementCircuitBreakerOpendTotalTelemetry(LongCounter circuitBreakerStateTotal, Attributes attributes) {
             
         }
 
@@ -173,7 +188,7 @@ public interface FaultToleranceMetrics {
                 register("ft.circuitbreaker.state.total", MetricUnits.NANOSECONDS, state::nanosClosed, "state", "closed");
                 register(Counter.class.getTypeName(), "ft.circuitbreaker.opened.total");
                 addCircuitBreakerCallsTotal(createFTCircuitBreakerCallsTotal(currentMeter));
-                
+                addCircuitBreakerOpenedTotal(createFTCircuitBreakerOpenedTotal(currentMeter));
                 createFTCircuitBreakerStateTotal(getClassAndMethodName(), currentMeter);
             }
             if (policy.isBulkheadPresent()) {
@@ -241,6 +256,7 @@ public interface FaultToleranceMetrics {
 
     default void incrementCounter(String metric) {
         incrementCounter(metric, NO_TAGS);
+        
     }
 
     /**
@@ -437,6 +453,8 @@ public interface FaultToleranceMetrics {
      */
     default void incrementCircuitbreakerOpenedTotal() {
         incrementCounter("ft.circuitbreaker.opened.total");
+        incrementCircuitBreakerOpendTotalTelemetry(getCircuitBreakerOpendTotal(), Attributes.builder().putAll(Attributes.builder().put(AttributeKey
+                .stringKey("method"), getClassAndMethodName()).build()).build());
     }
 
     /*
@@ -496,13 +514,19 @@ public interface FaultToleranceMetrics {
     
     public void addCircuitBreakerCallsTotal(LongCounter circuitBreakerCallsTotal);
     
+    public void addCircuitBreakerOpenedTotal(LongCounter circuitBreakerOpenedTotal);
+    
     public LongCounter getCircuitBreakerCallsTotal();
+    
+    public LongCounter getCircuitBreakerOpendTotal();
     
     public void incrementCircuitBreakerCallsSuccessCount(LongCounter circuitBreakerCallsSuccessCount, Attributes attributes);
     
     public void incrementCircuitBreakerCallsFailureCount(LongCounter circuitBreakerCallsFailureCount, Attributes attributes);
     
     public void incrementCircuitBreakerCallsCircuitOpenCount(LongCounter circuitBreakerStateTotal, Attributes attributes);
+    
+    public void incrementCircuitBreakerOpendTotalTelemetry(LongCounter circuitBreakerOpendTotal, Attributes attributes);
     
     public void setClassAndMethodName(String classAndMethodName);
     
