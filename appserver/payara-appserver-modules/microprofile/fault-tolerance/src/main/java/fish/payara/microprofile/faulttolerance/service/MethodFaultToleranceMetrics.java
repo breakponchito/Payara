@@ -198,7 +198,10 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
 
     @Override
     public void incrementCounter(String metric, Tag... tags) {
-        countersByMetricID.get(withMethodTag(metric, tags)).inc();
+        Counter counter = countersByMetricID.get(withMethodTag(metric, tags));
+        if (counter != null) {
+            countersByMetricID.get(withMethodTag(metric, tags)).inc();
+        }
     }
 
     @Override
