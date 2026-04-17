@@ -132,10 +132,17 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
         if (registered.compareAndSet(false, true)) {
             metrics = FaultToleranceMetrics.super.boundTo(context, policy); // trigger registration if needed
         }
-        return new MethodFaultToleranceMetrics(registry, canonicalMethodName,
-                policy.isFallbackPresent() ? FallbackUsage.notApplied : FallbackUsage.notDefined,
-                registered, countersByMetricID, histogramsByMetricID, metrics != null ? metrics.getCircuitBreakerCallsTotal() : null, 
-                metrics != null ? metrics.getInvocationsValueReturnedCounter() : null, metrics != null ? metrics.getClassAndMethodName() : null);
+        if(metrics != null) {
+            return new MethodFaultToleranceMetrics(registry, canonicalMethodName,
+                    policy.isFallbackPresent() ? FallbackUsage.notApplied : FallbackUsage.notDefined,
+                    registered, countersByMetricID, histogramsByMetricID, metrics.getCircuitBreakerCallsTotal(),
+                    metrics.getInvocationsValueReturnedCounter(), metrics.getClassAndMethodName());
+        } else {
+            return new MethodFaultToleranceMetrics(registry, canonicalMethodName,
+                    policy.isFallbackPresent() ? FallbackUsage.notApplied : FallbackUsage.notDefined,
+                    registered, countersByMetricID, histogramsByMetricID, this.getCircuitBreakerCallsTotal(),
+                    this.getInvocationsValueReturnedCounter(), this.getClassAndMethodName());
+        }
     }
 
     /*
