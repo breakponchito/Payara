@@ -106,7 +106,7 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
     private MethodFaultToleranceMetrics(MetricRegistry registry, String canonicalMethodName, FallbackUsage fallbackUsage,
                                         AtomicBoolean registered, Map<MetricID, Counter> countersByMetricID, 
                                         Map<MetricID, Histogram> histogramsByMetricID,
-                                        LongCounter ftCircuitBreakerCallsTotal, String classAndMethodName) {
+                                        LongCounter ftCircuitBreakerCallsTotal, LongCounter ftInvocationsTotal, String classAndMethodName) {
         this.registry = registry;
         this.canonicalMethodName = canonicalMethodName;
         this.fallbackUsage = fallbackUsage;
@@ -114,6 +114,7 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
         this.countersByMetricID = countersByMetricID;
         this.histogramsByMetricID = histogramsByMetricID;
         this.ftCircuitBreakerCallsTotal = ftCircuitBreakerCallsTotal;
+        this.ftInvocationsTotal = ftInvocationsTotal;
         this.classAndMethodName = classAndMethodName;   
     }
     
@@ -134,7 +135,7 @@ public final class MethodFaultToleranceMetrics implements FaultToleranceMetrics 
         return new MethodFaultToleranceMetrics(registry, canonicalMethodName,
                 policy.isFallbackPresent() ? FallbackUsage.notApplied : FallbackUsage.notDefined,
                 registered, countersByMetricID, histogramsByMetricID, metrics != null ? metrics.getCircuitBreakerCallsTotal() : null, 
-                metrics != null ? metrics.getClassAndMethodName() : null);
+                metrics != null ? metrics.getInvocationsValueReturnedCounter() : null, metrics != null ? metrics.getClassAndMethodName() : null);
     }
 
     /*
